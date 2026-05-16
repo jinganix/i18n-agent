@@ -1,0 +1,6 @@
+{
+  "welcome": "欢迎",
+  "goodbye": "再见",
+  "hello": "你好 {name}",
+  "items_count": "{count} 个项目"
+}
