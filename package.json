@@ -1,0 +1,56 @@
+{
+  "name": "i18n-agent",
+  "private": true,
+  "version": "0.0.1",
+  "type": "module",
+  "scripts": {
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
+    "lint": "eslint ./src",
+    "lint:fix": "eslint ./src --fix",
+    "cz": "cz",
+    "postinstall": "husky"
+  },
+  "devDependencies": {
+    "@commitlint/config-conventional": "^21.0.1",
+    "@commitlint/cz-commitlint": "^21.0.1",
+    "@eslint/compat": "^2.1.0",
+    "@eslint/js": "^9.39.4",
+    "@types/eslint": "^9.6.1",
+    "@typescript-eslint/eslint-plugin": "^8.59.3",
+    "@typescript-eslint/parser": "^8.59.3",
+    "@vitest/coverage-v8": "^4.1.6",
+    "commitizen": "^4.3.1",
+    "commitlint": "^21.0.1",
+    "eslint": "^9.39.4",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-sort-keys-fix": "^1.1.2",
+    "globals": "^17.6.0",
+    "husky": "^9.1.7",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.59.3",
+    "vite": "^8.0.13",
+    "vite-plugin-checker": "^0.13.0",
+    "vitest": "^4.1.6"
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
+  },
+  "commitlint": {
+    "extends": "@commitlint/config-conventional",
+    "rules": {
+      "scope-enum": [
+        2,
+        "always",
+        [
+          "deps",
+          "docs"
+        ]
+      ]
+    }
+  }
+}
