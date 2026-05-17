@@ -3,5 +3,5 @@
   "targetLocales": ["ja", "zh"],
   "localesDir": "./tests/locales",
   "model": "gpt-4o-mini",
-  "batchSize": 50
+  "tokenSize": 3000
 }

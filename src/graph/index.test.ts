@@ -40,4 +40,15 @@ describe("graph/index", () => {
 
     consoleSpy.mockRestore();
   });
+
+  it("should build tasks in sync workflow", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    await syncWorkflow("tests/i18n-agent.config.json");
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Built"));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Batch"));
+
+    consoleSpy.mockRestore();
+  });
 });
