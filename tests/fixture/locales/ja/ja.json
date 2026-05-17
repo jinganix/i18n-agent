@@ -1,0 +1,6 @@
+{
+  "welcome": "Welcome",
+  "goodbye": "Goodbye",
+  "hello": "Hello {name}",
+  "items_count": "{count} items"
+}
