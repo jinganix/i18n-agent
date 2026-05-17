@@ -4,12 +4,14 @@ import { Command } from "commander";
 import { version } from "../../package.json" with { type: "json" };
 import { diffCommand } from "./commands/diff";
 import { runCommand } from "./commands/run";
+import { syncCommand } from "./commands/sync";
 
 export function createProgram(): Command {
   const program = new Command();
   program.name("i18n-agent").description("i18n agent CLI tool").version(version);
   diffCommand(program);
   runCommand(program);
+  syncCommand(program);
   return program;
 }
 

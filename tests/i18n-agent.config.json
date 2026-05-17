@@ -1,0 +1,7 @@
+{
+  "sourceLocale": "en",
+  "targetLocales": ["ja", "zh"],
+  "localesDir": "./locales",
+  "model": "gpt-4o-mini",
+  "batchSize": 50
+}
