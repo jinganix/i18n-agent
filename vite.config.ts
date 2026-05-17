@@ -21,6 +21,9 @@ export default defineConfig({
   },
   plugins: [checker({ typescript: { tsconfigPath: "./tsconfig.app.json" } })],
   resolve: {
+    alias: {
+      "@": resolve(__dirname, "src"),
+    },
     tsconfigPaths: true,
   },
   test: {

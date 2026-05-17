@@ -7,6 +7,8 @@ export interface TaskBatch {
   batchId: number;
   locale: string;
   keys: Array<{
+    fileId: number;
+    filePath: string;
     prefixedKey: string;
     value: string | number | boolean | null;
   }>;
@@ -69,6 +71,7 @@ export async function buildTasksNode(
   for (const targetLocale of state.config.targetLocales) {
     const localeKeys: Array<{
       fileId: number;
+      filePath: string;
       prefixedKey: string;
       value: string | number | boolean | null;
     }> = [];
@@ -76,11 +79,18 @@ export async function buildTasksNode(
     for (const [, data] of Object.entries(state.flattenedData)) {
       for (const [prefixedKey, value] of Object.entries(data)) {
         const fileId = parseInt(prefixedKey.split(".")[0], 10);
-        localeKeys.push({ fileId, prefixedKey, value });
+        localeKeys.push({
+          fileId,
+          filePath: state.files[fileId - 1].relativePath,
+          prefixedKey,
+          value,
+        });
       }
     }
 
     let currentBatch: Array<{
+      fileId: number;
+      filePath: string;
       prefixedKey: string;
       value: string | number | boolean | null;
     }> = [];
@@ -102,6 +112,8 @@ export async function buildTasksNode(
       }
 
       currentBatch.push({
+        fileId: keyItem.fileId,
+        filePath: keyItem.filePath,
         prefixedKey: keyItem.prefixedKey,
         value: keyItem.value,
       });

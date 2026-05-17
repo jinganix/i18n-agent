@@ -20,7 +20,7 @@ describe("build.tasks", () => {
         targetLocales: ["ja", "zh"],
         tokenSize: 100,
       },
-      files: [] as FileItem[],
+      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
       flattenedData: {
         "en.json": {
           "1.key1": "value1",
@@ -49,7 +49,7 @@ describe("build.tasks", () => {
         targetLocales: ["ja", "zh"],
         tokenSize: 1000,
       },
-      files: [] as FileItem[],
+      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
       flattenedData: {
         "en.json": {
           "1.key1": "value1",
@@ -83,7 +83,7 @@ describe("build.tasks", () => {
         targetLocales: ["ja"],
         tokenSize: 1000,
       },
-      files: [] as FileItem[],
+      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
       flattenedData: {
         "en.json": {
           "1.key1": "value1",
@@ -106,7 +106,7 @@ describe("build.tasks", () => {
         targetLocales: ["ja"],
         tokenSize: 10,
       },
-      files: [] as FileItem[],
+      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
       flattenedData: {
         "en.json": {
           "1.key1": "value1",
@@ -130,7 +130,7 @@ describe("build.tasks", () => {
         sourceLocale: "en",
         targetLocales: ["ja"],
       },
-      files: [] as FileItem[],
+      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
       flattenedData: {
         "en.json": {
           "1.key1": "value1",

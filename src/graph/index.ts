@@ -4,6 +4,7 @@ import { detectChanges, StateAnnotation } from "./nodes/detect.changes.js";
 import { flattenKeysNode, FlattenKeysAnnotation } from "./nodes/flatten.keys.js";
 import { loadConfigNode, SyncAnnotation } from "./nodes/load.config.js";
 import { scanFilesNode, ScanFilesAnnotation } from "./nodes/scan.files.js";
+import { syncFilesNode, SyncFilesAnnotation } from "./nodes/sync.files.js";
 import { translateNode, TranslateAnnotation } from "./nodes/translate.js";
 
 export async function runWorkflow(): Promise<void> {
@@ -68,10 +69,24 @@ export async function syncWorkflow(configPath: string, sourcePath?: string): Pro
     translatedResults: {},
   };
 
-  await new StateGraph(TranslateAnnotation)
+  const translateResult = await new StateGraph(TranslateAnnotation)
     .addNode("translate", translateNode)
     .addEdge(START, "translate")
     .addEdge("translate", END)
     .compile()
     .invoke(translateState);
+
+  const syncState = {
+    config: (configResult as typeof SyncAnnotation.State).config!,
+    syncedFiles: [],
+    tasks: (buildResult as typeof BuildTasksAnnotation.State).tasks,
+    translatedResults: (translateResult as typeof TranslateAnnotation.State).translatedResults,
+  };
+
+  await new StateGraph(SyncFilesAnnotation)
+    .addNode("syncFiles", syncFilesNode)
+    .addEdge(START, "syncFiles")
+    .addEdge("syncFiles", END)
+    .compile()
+    .invoke(syncState);
 }
