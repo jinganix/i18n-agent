@@ -2,6 +2,7 @@ import { Annotation } from "@langchain/langgraph/web";
 import type { TaskBatch } from "./build.tasks.js";
 import type { ApiConfig } from "./load.config.js";
 import { callTranslationApi, getPromptForLocale, loadPrompt } from "@/utils/api.client.js";
+import { cleanJson } from "@/utils/json.cleaner.js";
 
 export interface TranslateState {
   tasks: TaskBatch[];
@@ -76,7 +77,9 @@ export async function translateNode(
         model: state.apiConfig.model || "gpt-4o-mini",
       });
 
-      translatedResults[`batch_${task.batchId}`] = JSON.parse(response);
+      // Clean the response to handle extra characters from AI
+      const cleanedResponse = cleanJson(response);
+      translatedResults[`batch_${task.batchId}`] = JSON.parse(cleanedResponse);
     }
   }
 
