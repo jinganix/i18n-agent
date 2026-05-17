@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { executeSync, syncCommand } from "./sync.js";
 
 vi.mock("@/graph/index.js", () => ({
@@ -7,10 +7,23 @@ vi.mock("@/graph/index.js", () => ({
 }));
 
 describe("commands/sync", () => {
+  let exitSpy: ReturnType<typeof vi.spyOn>;
+  let errorSpy: ReturnType<typeof vi.spyOn>;
+
+  beforeEach(() => {
+    exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+    errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "log").mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("should execute sync command with valid config file", async () => {
     const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
 
-    await executeSync({ config: "tests/i18n-agent.config.json" });
+    await executeSync({ config: "tests/fixture/i18n-agent.config.json" });
 
     expect(exitSpy).not.toHaveBeenCalled();
 
@@ -74,5 +87,62 @@ describe("commands/sync", () => {
     }
 
     vi.restoreAllMocks();
+  });
+
+  it("should handle sync workflow error", async () => {
+    const { syncWorkflow } = await import("@/graph/index.js");
+    const mockError = new Error("Translation API failed");
+    vi.mocked(syncWorkflow).mockRejectedValueOnce(mockError);
+
+    await executeSync({ config: "tests/fixture/i18n-agent.config.json" });
+
+    expect(errorSpy).toHaveBeenCalledWith("Error: Translation API failed");
+    expect(exitSpy).toHaveBeenCalledWith(1);
+  });
+
+  it("should execute sync with source parameter", async () => {
+    const { syncWorkflow } = await import("@/graph/index.js");
+
+    await executeSync({
+      config: "tests/fixture/i18n-agent.config.json",
+      source: "messages.json",
+    });
+
+    expect(syncWorkflow).toHaveBeenCalledWith(
+      "tests/fixture/i18n-agent.config.json",
+      "messages.json",
+      undefined,
+    );
+  });
+
+  it("should execute sync with dry-run option", async () => {
+    const { syncWorkflow } = await import("@/graph/index.js");
+
+    await executeSync({
+      config: "tests/fixture/i18n-agent.config.json",
+      dryRun: true,
+    });
+
+    expect(syncWorkflow).toHaveBeenCalledWith(
+      "tests/fixture/i18n-agent.config.json",
+      undefined,
+      true,
+    );
+  });
+
+  it("should execute sync with all options", async () => {
+    const { syncWorkflow } = await import("@/graph/index.js");
+
+    await executeSync({
+      config: "tests/fixture/i18n-agent.config.json",
+      dryRun: true,
+      source: "nested.json",
+    });
+
+    expect(syncWorkflow).toHaveBeenCalledWith(
+      "tests/fixture/i18n-agent.config.json",
+      "nested.json",
+      true,
+    );
   });
 });

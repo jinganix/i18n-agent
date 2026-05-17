@@ -31,7 +31,6 @@ export async function executeToolCall(
         await executeSync({
           config,
           dryRun: syncParams.dryRun as boolean | undefined,
-          // c8 ignore next
           source: (syncParams.sourcePath || syncParams.source) as string | undefined,
         });
 
@@ -52,7 +51,6 @@ export async function executeToolCall(
 
         console.log(`\n🔍 Executing diff...`);
         await executeDiff({
-          // c8 ignore next
           format: (diffParams.format as "json" | "text" | "table") || "text",
           source: diffParams.source as string,
           target: diffParams.target as string,
@@ -71,11 +69,9 @@ export async function executeToolCall(
         };
     }
   } catch (error) {
-    // c8 ignore start
     return {
       message: `Tool execution failed: ${(error as Error).message}`,
       success: false,
     };
-    // c8 ignore end
   }
 }

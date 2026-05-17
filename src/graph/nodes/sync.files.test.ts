@@ -1,4 +1,6 @@
-import { describe, it, expect, vi } from "vitest";
+import { mkdirSync, rmSync } from "fs";
+import { join } from "path";
+import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import type { TaskBatch } from "./build.tasks.js";
 import { syncFilesNode, SyncFilesAnnotation } from "./sync.files.js";
 
@@ -10,6 +12,16 @@ vi.mock("../../utils/file.syncer.js", () => ({
 }));
 
 describe("sync.files", () => {
+  const tempDir = join(process.cwd(), ".tmp/temp-sync-test");
+
+  beforeAll(() => {
+    mkdirSync(tempDir, { recursive: true });
+  });
+
+  afterAll(() => {
+    rmSync(tempDir, { force: true, recursive: true });
+  });
+
   it("should sync translated files to target locales", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
@@ -24,7 +36,7 @@ describe("sync.files", () => {
 
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: tempDir,
         sourceLocale: "en",
         targetLocales: ["ja"],
       },
@@ -67,7 +79,7 @@ describe("sync.files", () => {
 
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: tempDir,
         sourceLocale: "en",
         targetLocales: ["ja", "zh"],
       },
@@ -104,7 +116,7 @@ describe("sync.files", () => {
 
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: tempDir,
         sourceLocale: "en",
         targetLocales: ["ja"],
       },
@@ -138,7 +150,7 @@ describe("sync.files", () => {
 
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: tempDir,
         sourceLocale: "en",
         targetLocales: ["ja"],
       },
@@ -154,6 +166,157 @@ describe("sync.files", () => {
     const result = await syncFilesNode(state as typeof SyncFilesAnnotation.State);
 
     expect(result.syncedFiles![0].filePath).toContain("nested.json");
+
+    consoleSpy.mockRestore();
+  });
+
+  it("should handle missing batch data gracefully", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    const tasks: TaskBatch[] = [
+      {
+        batchId: 1,
+        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "Value" }],
+        locale: "fr",
+        tokenCount: 20,
+      },
+    ];
+
+    const state = {
+      config: {
+        localesDir: tempDir,
+        sourceLocale: "en",
+        targetLocales: ["fr"],
+      },
+      syncedFiles: [],
+      tasks,
+      translatedResults: {
+        // Missing batch_1 data
+      },
+    };
+
+    const result = await syncFilesNode(state as typeof SyncFilesAnnotation.State);
+
+    // Should complete without error even with missing data
+    expect(result.syncedFiles).toBeDefined();
+
+    consoleSpy.mockRestore();
+  });
+
+  it("should handle file without extension", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    const tasks: TaskBatch[] = [
+      {
+        batchId: 1,
+        keys: [{ fileId: 1, filePath: "messages", prefixedKey: "1.key1", value: "值1" }],
+        locale: "zh",
+        tokenCount: 20,
+      },
+    ];
+
+    const state = {
+      config: {
+        localesDir: tempDir,
+        sourceLocale: "en",
+        targetLocales: ["zh"],
+      },
+      syncedFiles: [],
+      tasks,
+      translatedResults: {
+        batch_1: {
+          "1.key1": "值1",
+        },
+      },
+    };
+
+    const result = await syncFilesNode(state as typeof SyncFilesAnnotation.State);
+
+    expect(result.syncedFiles).toBeDefined();
+
+    consoleSpy.mockRestore();
+  });
+
+  it("should handle multiple files in same locale", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    const tasks: TaskBatch[] = [
+      {
+        batchId: 1,
+        keys: [
+          { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "值1" },
+          { fileId: 2, filePath: "nested.json", prefixedKey: "2.key2", value: "值2" },
+        ],
+        locale: "zh",
+        tokenCount: 40,
+      },
+    ];
+
+    const state = {
+      config: {
+        localesDir: tempDir,
+        sourceLocale: "en",
+        targetLocales: ["zh"],
+      },
+      syncedFiles: [],
+      tasks,
+      translatedResults: {
+        batch_1: {
+          "1.key1": "值1",
+          "2.key2": "值2",
+        },
+      },
+    };
+
+    const result = await syncFilesNode(state as typeof SyncFilesAnnotation.State);
+
+    expect(result.syncedFiles!.length).toBe(2);
+
+    consoleSpy.mockRestore();
+  });
+
+  it("should handle multiple batches for same locale", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    // Multiple batches for the same locale to test the if (!batchesByLocale[task.locale]) branch
+    const tasks: TaskBatch[] = [
+      {
+        batchId: 1,
+        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "Value1" }],
+        locale: "de",
+        tokenCount: 20,
+      },
+      {
+        batchId: 2,
+        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key2", value: "Value2" }],
+        locale: "de",
+        tokenCount: 20,
+      },
+    ];
+
+    const state = {
+      config: {
+        localesDir: tempDir,
+        sourceLocale: "en",
+        targetLocales: ["de"],
+      },
+      syncedFiles: [],
+      tasks,
+      translatedResults: {
+        batch_1: {
+          "1.key1": "Wert1",
+        },
+        batch_2: {
+          "1.key2": "Wert2",
+        },
+      },
+    };
+
+    const result = await syncFilesNode(state as typeof SyncFilesAnnotation.State);
+
+    // Both batches should be merged into one file
+    expect(result.syncedFiles!.length).toBe(1);
+    expect(result.syncedFiles![0].keyCount).toBe(2);
 
     consoleSpy.mockRestore();
   });

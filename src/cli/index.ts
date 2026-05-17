@@ -24,7 +24,9 @@ export function runCLI(argv: string[] = process.argv): void {
 
 export function isMain(metaUrl: string, argvPath: string): boolean {
   // c8 ignore next
-  if (!argvPath) return false;
+  if (!argvPath) {
+    return false;
+  }
   const metaPath = metaUrl.replace("file://", "");
   return (
     metaPath === argvPath ||

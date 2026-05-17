@@ -3,6 +3,7 @@ import type { TaskBatch } from "./build.tasks.js";
 import type { ApiConfig } from "./load.config.js";
 import { callTranslationApi, getPromptForLocale, loadPrompt } from "@/utils/api.client.js";
 import { cleanJson } from "@/utils/json.cleaner.js";
+import { replaceReducer } from "@/utils/langgraph.helpers.js";
 
 export interface TranslateState {
   tasks: TaskBatch[];
@@ -14,23 +15,19 @@ export interface TranslateState {
 export const TranslateAnnotation = Annotation.Root({
   apiConfig: Annotation<ApiConfig | undefined>({
     default: () => undefined,
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   dryRun: Annotation<boolean>({
     default: () => false,
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   tasks: Annotation<TaskBatch[]>({
     default: () => [],
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   translatedResults: Annotation<Record<string, Record<string, string>>>({
     default: () => ({}),
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
 });
 
@@ -63,11 +60,9 @@ export async function translateNode(
 
       console.log(`Translating batch ${task.batchId} to ${task.locale}...`);
 
-      // c8 ignore start
       if (!state.apiConfig) {
         throw new Error("API configuration is required for translation");
       }
-      // c8 ignore end
 
       const response = await callTranslationApi(state.apiConfig, {
         messages: [

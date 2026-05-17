@@ -12,7 +12,6 @@ export function validateJsonStructure(
   try {
     JSON.stringify(outputData);
   } catch {
-    // c8 ignore next 4
     return {
       errors: ["Output is not valid JSON"],
       isValid: false,

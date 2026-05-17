@@ -1,0 +1,7 @@
+{
+  "welcome": "Bienvenue",
+  "goodbye": "Au revoir",
+  "hello": "Bonjour {name}",
+  "items_count": "{count} éléments",
+  "apples": "Elle a {count, plural, =0 {aucune pomme} one {# pomme} other {# pommes}}"
+}

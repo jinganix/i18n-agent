@@ -128,13 +128,11 @@ export async function executeAssistant(userMessage: string, configPath?: string)
   try {
     console.log("🤔 Understanding your request...");
 
-    // c8 ignore next 2
     const resolvedConfigPath = configPath
       ? resolve(process.cwd(), configPath)
       : resolve(process.cwd(), "i18n-agent.config.json");
     let apiConfig: ApiConfig;
 
-    // c8 ignore start
     try {
       const configContent = readFileSync(resolvedConfigPath, "utf-8");
       const config = JSON.parse(configContent);
@@ -147,7 +145,6 @@ export async function executeAssistant(userMessage: string, configPath?: string)
       console.error(`Please ensure ${resolvedConfigPath} exists with API settings`);
       process.exit(1);
     }
-    // c8 ignore end
 
     const response = await callTranslationApi(apiConfig, {
       messages: [
@@ -165,12 +162,10 @@ export async function executeAssistant(userMessage: string, configPath?: string)
 
     try {
       decision = JSON.parse(response);
-      // c8 ignore start
     } catch {
       console.error("Error: AI response is not valid JSON");
       console.log("AI Response:", response);
       process.exit(1);
-      // c8 ignore end
     }
 
     console.log(`\n💡 ${decision.explanation}\n`);
@@ -198,7 +193,6 @@ export async function executeAssistant(userMessage: string, configPath?: string)
   } catch (error) {
     console.error(`Error: ${(error as Error).message}`);
     process.exit(1);
-    // c8 ignore end
   }
 }
 

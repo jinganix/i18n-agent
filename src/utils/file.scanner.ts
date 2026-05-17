@@ -28,9 +28,7 @@ export function collectJsonFiles(
     const fullPath = join(dir, entry);
     const stats = statSync(fullPath);
 
-    // c8 ignore next 3
     if (stats.isDirectory()) {
-      // c8 ignore next
       currentId = collectJsonFiles(fullPath, baseDir, files, currentId);
     } else if (entry.endsWith(".json")) {
       const relPath = relative(baseDir, fullPath);
