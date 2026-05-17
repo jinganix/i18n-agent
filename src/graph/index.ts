@@ -1,6 +1,6 @@
 import { StateGraph, START, END } from "@langchain/langgraph/web";
 import { buildTasksNode, BuildTasksAnnotation } from "./nodes/build.tasks.js";
-import { detectChanges, StateAnnotation } from "./nodes/detect.changes.js";
+import { detectChangesNode, DetectChangesAnnotation } from "./nodes/detect.changes.js";
 import { flattenKeysNode, FlattenKeysAnnotation } from "./nodes/flatten.keys.js";
 import { loadConfigNode, SyncAnnotation } from "./nodes/load.config.js";
 import { scanFilesNode, ScanFilesAnnotation } from "./nodes/scan.files.js";
@@ -9,12 +9,12 @@ import { translateNode, TranslateAnnotation } from "./nodes/translate.js";
 import { validateResultsNode, ValidateResultsAnnotation } from "./nodes/validate.results.js";
 
 export async function runWorkflow(): Promise<void> {
-  await new StateGraph(StateAnnotation)
-    .addNode("detectChanges", detectChanges)
+  await new StateGraph(DetectChangesAnnotation)
+    .addNode("detectChanges", detectChangesNode)
     .addEdge(START, "detectChanges")
     .addEdge("detectChanges", END)
     .compile()
-    .invoke({ messages: [] });
+    .invoke({ detectionResults: {}, files: [] });
 }
 
 export async function syncWorkflow(
