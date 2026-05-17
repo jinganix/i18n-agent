@@ -1,36 +1,27 @@
 import { Command } from "commander";
-import { readFileSync } from "fs";
 import { describe, it, expect, vi } from "vitest";
 import { executeSync, syncCommand } from "./sync.js";
 
-const mockReadFileSync = vi.mocked(readFileSync);
-
-vi.mock("fs", () => ({
-  readFileSync: vi.fn(),
-}));
-
 describe("commands/sync", () => {
-  it("should execute sync command with valid JSON file", async () => {
+  it("should execute sync command with valid config file", async () => {
     const consoleSpy = vi.spyOn(console, "log");
-    const mockContent = '{"user": {"name": "John"}}';
-    mockReadFileSync.mockReturnValue(mockContent);
 
-    await executeSync({ source: "tests/locales/en/en.json" });
+    await executeSync({ config: "tests/i18n-agent.config.json" });
 
     expect(consoleSpy).toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });
 
-  it("should show error when source file is not provided", async () => {
+  it("should show error when config file is not provided", async () => {
     const errorSpy = vi.spyOn(console, "error");
     const logSpy = vi.spyOn(console, "log");
     const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
 
     await executeSync({});
 
-    expect(errorSpy).toHaveBeenCalledWith("Error: Source file is required");
-    expect(logSpy).toHaveBeenCalledWith("\nUsage: i18n-agent sync -s <source.json>");
+    expect(errorSpy).toHaveBeenCalledWith("Error: Config file is required");
+    expect(logSpy).toHaveBeenCalledWith("\nUsage: i18n-agent sync -c <config.json>");
     expect(exitSpy).toHaveBeenCalledWith(1);
 
     errorSpy.mockRestore();
@@ -38,42 +29,12 @@ describe("commands/sync", () => {
     exitSpy.mockRestore();
   });
 
-  it("should show error when JSON is invalid", async () => {
-    const errorSpy = vi.spyOn(console, "error");
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
-    mockReadFileSync.mockReturnValue("invalid json");
-
-    await executeSync({ source: "test.json" });
-
-    expect(errorSpy).toHaveBeenCalled();
-    expect(exitSpy).toHaveBeenCalledWith(1);
-
-    errorSpy.mockRestore();
-    exitSpy.mockRestore();
-  });
-
-  it("should show error when file read fails", async () => {
-    const errorSpy = vi.spyOn(console, "error");
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
-    mockReadFileSync.mockImplementation(() => {
-      throw new Error("File not found");
-    });
-
-    await executeSync({ source: "nonexistent.json" });
-
-    expect(errorSpy).toHaveBeenCalledWith("Error: File not found");
-    expect(exitSpy).toHaveBeenCalledWith(1);
-
-    errorSpy.mockRestore();
-    exitSpy.mockRestore();
-  });
-
   it("should register sync command to program", async () => {
     const program = new Command();
-    let capturedAction: ((options: { source?: string }) => Promise<void>) | undefined;
+    let capturedAction: ((options: { config?: string }) => Promise<void>) | undefined;
 
     const commandMock = {
-      action: (fn: (options: { source?: string }) => Promise<void>) => {
+      action: (fn: (options: { config?: string }) => Promise<void>) => {
         capturedAction = fn;
         return commandMock;
       },
@@ -88,10 +49,11 @@ describe("commands/sync", () => {
     syncCommand(program);
 
     expect(program.command).toHaveBeenCalledWith("sync");
-    expect(commandMock.description).toHaveBeenCalledWith(
-      "Normalize i18n JSON keys to flat dot notation",
+    expect(commandMock.description).toHaveBeenCalledWith("Sync i18n files based on configuration");
+    expect(commandMock.option).toHaveBeenCalledWith(
+      "-c, --config <path>",
+      "Configuration file path",
     );
-    expect(commandMock.option).toHaveBeenCalledWith("-s, --source <path>", "Source JSON file path");
     expect(capturedAction).toBeDefined();
 
     if (capturedAction) {
