@@ -15,8 +15,8 @@ describe("translate", () => {
       {
         batchId: 1,
         keys: [
-          { prefixedKey: "1.key1", value: "value1" },
-          { prefixedKey: "1.key2", value: "value2" },
+          { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" },
+          { fileId: 1, filePath: "en.json", prefixedKey: "1.key2", value: "value2" },
         ],
         locale: "ja",
         tokenCount: 50,
@@ -44,13 +44,13 @@ describe("translate", () => {
     const tasks: TaskBatch[] = [
       {
         batchId: 1,
-        keys: [{ prefixedKey: "1.key1", value: "value1" }],
+        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
         locale: "ja",
         tokenCount: 25,
       },
       {
         batchId: 2,
-        keys: [{ prefixedKey: "1.key1", value: "value1" }],
+        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
         locale: "zh",
         tokenCount: 25,
       },
