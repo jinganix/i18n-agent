@@ -12,7 +12,7 @@ export default defineConfig({
     },
     outDir: "dist",
     rollupOptions: {
-      external: ["commander"],
+      external: ["commander", "fs", "path", "url", "@dqbd/tiktoken"],
       output: {
         entryFileNames: "cli/index.js",
         preserveModules: false,

@@ -3,5 +3,10 @@
   "targetLocales": ["ja", "zh"],
   "localesDir": "./tests/locales",
   "model": "gpt-4o-mini",
-  "tokenSize": 3000
+  "tokenSize": 3000,
+  "api": {
+    "baseUrl": "https://api.openai.com/v1",
+    "apiKey": "sk-test-key",
+    "timeout": 30000
+  }
 }
