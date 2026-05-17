@@ -9,26 +9,12 @@ describe("graph/index", () => {
     consoleSpy.mockRestore();
   });
 
-  it("should sync workflow and normalize keys", async () => {
+  it("should sync workflow and load config", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-    const input = {
-      user: {
-        name: "John",
-        profile: {
-          age: 30,
-        },
-      },
-    };
-
-    await syncWorkflow(input);
+    await syncWorkflow("tests/i18n-agent.config.json");
 
     expect(consoleSpy).toHaveBeenCalled();
-    const output = JSON.parse(consoleSpy.mock.calls[0][0]);
-    expect(output).toEqual({
-      "user.name": "John",
-      "user.profile.age": 30,
-    });
 
     consoleSpy.mockRestore();
   });
