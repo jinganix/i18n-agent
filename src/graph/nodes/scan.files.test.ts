@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { describe, it, expect, vi } from "vitest";
 import type { SyncConfig } from "./load.config.js";
 import { scanFilesNode, ScanFilesAnnotation } from "./scan.files.js";
@@ -99,7 +100,7 @@ describe("scan.files", () => {
     );
   });
 
-  it("should throw error when source path is outside source locale directory", async () => {
+  it("should throw error when source path is outside locales directory", async () => {
     const state = {
       config: mockConfig,
       files: [],
@@ -107,8 +108,31 @@ describe("scan.files", () => {
     };
 
     await expect(scanFilesNode(state as typeof ScanFilesAnnotation.State)).rejects.toThrow(
-      "Source path must be within the source locale directory",
+      "Source path must be within the locales directory",
     );
+  });
+
+  it("should accept absolute path within locales directory", async () => {
+    const { statSync } = await import("fs");
+
+    vi.mocked(statSync).mockReturnValue({
+      isDirectory: () => false,
+      isFile: () => true,
+    } as unknown as ReturnType<typeof statSync>);
+
+    const absolutePath = resolve(mockConfig.localesDir, "en/en.json");
+    const state = {
+      config: mockConfig,
+      files: [],
+      sourcePath: absolutePath,
+    };
+
+    const result = await scanFilesNode(state as typeof ScanFilesAnnotation.State);
+
+    expect(result.files).toBeDefined();
+    expect(result.files!).toHaveLength(1);
+    expect(result.files![0].absolutePath).toBe(absolutePath);
+    expect(result.files![0].relativePath).toBe("en.json");
   });
 
   it("should throw error when file is not JSON", async () => {
