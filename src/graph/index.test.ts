@@ -18,4 +18,14 @@ describe("graph/index", () => {
 
     consoleSpy.mockRestore();
   });
+
+  it("should sync workflow with source path", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    await syncWorkflow("tests/i18n-agent.config.json", "tests/locales/en/en.json");
+
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
 });

@@ -5,12 +5,14 @@ import { executeSync, syncCommand } from "./sync.js";
 describe("commands/sync", () => {
   it("should execute sync command with valid config file", async () => {
     const consoleSpy = vi.spyOn(console, "log");
+    const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
 
     await executeSync({ config: "tests/i18n-agent.config.json" });
 
     expect(consoleSpy).toHaveBeenCalled();
 
     consoleSpy.mockRestore();
+    exitSpy.mockRestore();
   });
 
   it("should show error when config file is not provided", async () => {
@@ -31,10 +33,12 @@ describe("commands/sync", () => {
 
   it("should register sync command to program", async () => {
     const program = new Command();
-    let capturedAction: ((options: { config?: string }) => Promise<void>) | undefined;
+    let capturedAction:
+      | ((options: { config?: string; source?: string }) => Promise<void>)
+      | undefined;
 
     const commandMock = {
-      action: (fn: (options: { config?: string }) => Promise<void>) => {
+      action: (fn: (options: { config?: string; source?: string }) => Promise<void>) => {
         capturedAction = fn;
         return commandMock;
       },
@@ -53,6 +57,10 @@ describe("commands/sync", () => {
     expect(commandMock.option).toHaveBeenCalledWith(
       "-c, --config <path>",
       "Configuration file path",
+    );
+    expect(commandMock.option).toHaveBeenCalledWith(
+      "-s, --source <path>",
+      "Source file or directory path (relative to source locale)",
     );
     expect(capturedAction).toBeDefined();
 
