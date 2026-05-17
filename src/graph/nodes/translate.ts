@@ -1,13 +1,26 @@
 import { Annotation } from "@langchain/langgraph/web";
 import type { TaskBatch } from "./build.tasks.js";
-import { getPromptForLocale, loadPrompt } from "@/utils/api.client.js";
+import type { ApiConfig } from "./load.config.js";
+import { callTranslationApi, getPromptForLocale, loadPrompt } from "@/utils/api.client.js";
 
 export interface TranslateState {
   tasks: TaskBatch[];
   translatedResults: Record<string, Record<string, string>>;
+  dryRun?: boolean;
+  apiConfig?: ApiConfig;
 }
 
 export const TranslateAnnotation = Annotation.Root({
+  apiConfig: Annotation<ApiConfig | undefined>({
+    default: () => undefined,
+    // c8 ignore next
+    reducer: (x, y) => y ?? x,
+  }),
+  dryRun: Annotation<boolean>({
+    default: () => false,
+    // c8 ignore next
+    reducer: (x, y) => y ?? x,
+  }),
   tasks: Annotation<TaskBatch[]>({
     default: () => [],
     // c8 ignore next
@@ -26,27 +39,45 @@ export async function translateNode(
   const translatedResults: Record<string, Record<string, string>> = {};
 
   for (const task of state.tasks) {
-    const promptTemplate = getPromptForLocale(task.locale);
-    const inputJson = JSON.stringify(
-      Object.fromEntries(task.keys.map((k) => [k.prefixedKey, k.value])),
-      null,
-      2,
-    );
+    if (state.dryRun) {
+      console.log(`[Dry Run] Skipping translation for batch ${task.batchId} to ${task.locale}...`);
+      const translatedKeys: Record<string, string> = {};
+      for (const key of task.keys) {
+        translatedKeys[key.prefixedKey] = String(key.value);
+      }
+      translatedResults[`batch_${task.batchId}`] = translatedKeys;
+    } else {
+      const promptTemplate = getPromptForLocale(task.locale);
+      const inputJson = JSON.stringify(
+        Object.fromEntries(task.keys.map((k) => [k.prefixedKey, k.value])),
+        null,
+        2,
+      );
 
-    loadPrompt(promptTemplate, {
-      inputJson,
-      sourceLocale: "en",
-      targetLocale: task.locale,
-    });
+      const prompt = loadPrompt(promptTemplate, {
+        inputJson,
+        sourceLocale: "en",
+        targetLocale: task.locale,
+      });
 
-    console.log(`Translating batch ${task.batchId} to ${task.locale}...`);
+      console.log(`Translating batch ${task.batchId} to ${task.locale}...`);
 
-    const translatedKeys: Record<string, string> = {};
-    for (const key of task.keys) {
-      translatedKeys[key.prefixedKey] = String(key.value);
+      // c8 ignore start
+      if (!state.apiConfig) {
+        throw new Error("API configuration is required for translation");
+      }
+      // c8 ignore end
+
+      const response = await callTranslationApi(state.apiConfig, {
+        messages: [
+          { content: prompt, role: "system" },
+          { content: inputJson, role: "user" },
+        ],
+        model: state.apiConfig.model || "gpt-4o-mini",
+      });
+
+      translatedResults[`batch_${task.batchId}`] = JSON.parse(response);
     }
-
-    translatedResults[`batch_${task.batchId}`] = translatedKeys;
   }
 
   console.log(`Translation completed for ${Object.keys(translatedResults).length} batches`);

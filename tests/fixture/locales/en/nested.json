@@ -1,0 +1,11 @@
+{
+  "welcome": "Welcome",
+  "user": {
+    "name": "John",
+    "profile": {
+      "age": 30,
+      "active": true
+    }
+  },
+  "items": null
+}

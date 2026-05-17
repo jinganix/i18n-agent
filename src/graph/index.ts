@@ -17,7 +17,11 @@ export async function runWorkflow(): Promise<void> {
     .invoke({ messages: [] });
 }
 
-export async function syncWorkflow(configPath: string, sourcePath?: string): Promise<void> {
+export async function syncWorkflow(
+  configPath: string,
+  sourcePath?: string,
+  dryRun?: boolean,
+): Promise<void> {
   const configResult = await new StateGraph(SyncAnnotation)
     .addNode("loadConfig", loadConfigNode)
     .addEdge(START, "loadConfig")
@@ -66,6 +70,8 @@ export async function syncWorkflow(configPath: string, sourcePath?: string): Pro
     .invoke(buildState);
 
   const translateState = {
+    apiConfig: (configResult as typeof SyncAnnotation.State).config?.api,
+    dryRun: dryRun || false,
     tasks: (buildResult as typeof BuildTasksAnnotation.State).tasks,
     translatedResults: {},
   };

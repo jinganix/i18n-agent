@@ -13,11 +13,16 @@ describe("load.config", () => {
   it("should load config successfully", async () => {
     const consoleSpy = vi.spyOn(console, "log");
     const mockConfig = {
-      batchSize: 50,
+      api: {
+        apiKey: "sk-test-key",
+        baseUrl: "https://api.openai.com/v1",
+        model: "gpt-4o-mini",
+        timeout: 30000,
+      },
       localesDir: "./locales",
-      model: "gpt-4o-mini",
       sourceLocale: "en",
       targetLocales: ["ja", "zh"],
+      tokenSize: 3000,
     };
 
     const { readFileSync } = await import("fs");

@@ -2,16 +2,18 @@ import { Command } from "commander";
 import { describe, it, expect, vi } from "vitest";
 import { executeSync, syncCommand } from "./sync.js";
 
+vi.mock("@/graph/index.js", () => ({
+  syncWorkflow: vi.fn(() => Promise.resolve()),
+}));
+
 describe("commands/sync", () => {
   it("should execute sync command with valid config file", async () => {
-    const consoleSpy = vi.spyOn(console, "log");
     const exitSpy = vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
 
     await executeSync({ config: "tests/i18n-agent.config.json" });
 
-    expect(consoleSpy).toHaveBeenCalled();
+    expect(exitSpy).not.toHaveBeenCalled();
 
-    consoleSpy.mockRestore();
     exitSpy.mockRestore();
   });
 

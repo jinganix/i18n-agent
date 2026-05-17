@@ -3,6 +3,9 @@ import type { TaskBatch } from "./build.tasks.js";
 import { translateNode, TranslateAnnotation } from "./translate.js";
 
 vi.mock("../../utils/api.client.js", () => ({
+  callTranslationApi: vi.fn(() =>
+    Promise.resolve('{"1.key1": "translated1", "1.key2": "translated2"}'),
+  ),
   getPromptForLocale: vi.fn(() => "Mock prompt template"),
   loadPrompt: vi.fn((_template, replacements) => `Loaded: ${replacements.targetLocale}`),
 }));
@@ -24,6 +27,12 @@ describe("translate", () => {
     ];
 
     const state = {
+      apiConfig: {
+        apiKey: "test-key",
+        baseUrl: "https://api.test.com/v1",
+        model: "gpt-4o-mini",
+      },
+      dryRun: false,
       tasks,
       translatedResults: {},
     };
@@ -32,7 +41,7 @@ describe("translate", () => {
 
     expect(result.translatedResults).toBeDefined();
     expect(result.translatedResults!["batch_1"]).toBeDefined();
-    expect(result.translatedResults!["batch_1"]["1.key1"]).toBe("value1");
+    expect(result.translatedResults!["batch_1"]["1.key1"]).toBe("translated1");
     expect(consoleSpy).toHaveBeenCalledWith("Translating batch 1 to ja...");
 
     consoleSpy.mockRestore();
@@ -57,6 +66,12 @@ describe("translate", () => {
     ];
 
     const state = {
+      apiConfig: {
+        apiKey: "test-key",
+        baseUrl: "https://api.test.com/v1",
+        model: "gpt-4o-mini",
+      },
+      dryRun: false,
       tasks,
       translatedResults: {},
     };
@@ -66,6 +81,37 @@ describe("translate", () => {
     expect(Object.keys(result.translatedResults!)).toHaveLength(2);
     expect(result.translatedResults!["batch_1"]).toBeDefined();
     expect(result.translatedResults!["batch_2"]).toBeDefined();
+
+    consoleSpy.mockRestore();
+  });
+
+  it("should skip translation in dry run mode", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    const tasks: TaskBatch[] = [
+      {
+        batchId: 1,
+        keys: [
+          { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" },
+          { fileId: 1, filePath: "en.json", prefixedKey: "1.key2", value: "value2" },
+        ],
+        locale: "ja",
+        tokenCount: 50,
+      },
+    ];
+
+    const state = {
+      dryRun: true,
+      tasks,
+      translatedResults: {},
+    };
+
+    const result = await translateNode(state as typeof TranslateAnnotation.State);
+
+    expect(result.translatedResults).toBeDefined();
+    expect(result.translatedResults!["batch_1"]).toBeDefined();
+    expect(result.translatedResults!["batch_1"]["1.key1"]).toBe("value1");
+    expect(consoleSpy).toHaveBeenCalledWith("[Dry Run] Skipping translation for batch 1 to ja...");
 
     consoleSpy.mockRestore();
   });

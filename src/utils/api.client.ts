@@ -47,10 +47,41 @@ export function getPromptForLocale(targetLocale: string): string {
   }
 }
 
+// c8 ignore next 2
 export async function callTranslationApi(
-  _config: ApiConfig,
-  _request: TranslationRequest,
+  config: ApiConfig,
+  request: TranslationRequest,
 ): Promise<string> {
-  // c8 ignore next
-  return "";
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), config.timeout || 30000);
+
+  try {
+    const response = await fetch(`${config.baseUrl}/chat/completions`, {
+      body: JSON.stringify(request),
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    // c8 ignore next 3
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+    }
+
+    const data = (await response.json()) as TranslationResponse;
+    return data.choices[0]?.message?.content || "";
+    // c8 ignore start
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error(`API request timeout after ${config.timeout || 30000}ms`);
+    }
+    throw error;
+    // c8 ignore end
+  }
 }
