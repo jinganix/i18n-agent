@@ -51,4 +51,15 @@ describe("graph/index", () => {
 
     consoleSpy.mockRestore();
   });
+
+  it("should translate in sync workflow", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    await syncWorkflow("tests/i18n-agent.config.json");
+
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Translating batch"));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Translation completed"));
+
+    consoleSpy.mockRestore();
+  });
 });

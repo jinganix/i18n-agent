@@ -11,7 +11,7 @@
     "coverage": "vitest run --coverage",
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
-    "build": "vite build",
+    "build": "vite build && cp -r src/prompts dist/prompts",
     "cli": "tsx src/cli/index.ts",
     "cz": "cz",
     "postinstall": "husky"
