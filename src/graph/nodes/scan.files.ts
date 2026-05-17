@@ -2,7 +2,7 @@ import { Annotation } from "@langchain/langgraph/web";
 import { statSync } from "fs";
 import { join, relative, resolve } from "path";
 import type { SyncConfig } from "./load.config.js";
-import { collectJsonFiles, logFileList, type FileItem } from "../../utils/file.scanner.js";
+import { collectJsonFiles, logFileList, type FileItem } from "@/utils/file.scanner.js";
 
 export interface ScanFilesState {
   config: SyncConfig | null;

@@ -12,7 +12,7 @@
     "lint": "eslint ./src",
     "lint:fix": "eslint ./src --fix",
     "build": "vite build && cp -r src/prompts dist/prompts",
-    "cli": "tsx src/cli/index.ts",
+    "cli": "tsx -r tsconfig-paths/register src/cli/index.ts",
     "cz": "cz",
     "postinstall": "husky"
   },
@@ -36,6 +36,7 @@
     "eslint-plugin-sort-keys-fix": "^1.1.2",
     "globals": "^17.6.0",
     "husky": "^9.1.7",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.22.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.59.3",

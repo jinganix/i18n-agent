@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { flattenKeysNode, FlattenKeysAnnotation } from "./flatten.keys.js";
-import type { FileItem } from "../../utils/file.scanner.js";
+import type { FileItem } from "@/utils/file.scanner.js";
 
 vi.mock("fs", () => ({
   readFileSync: vi.fn(),

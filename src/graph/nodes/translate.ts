@@ -1,6 +1,6 @@
 import { Annotation } from "@langchain/langgraph/web";
 import type { TaskBatch } from "./build.tasks.js";
-import { getPromptForLocale, loadPrompt } from "../../utils/api.client.js";
+import { getPromptForLocale, loadPrompt } from "@/utils/api.client.js";
 
 export interface TranslateState {
   tasks: TaskBatch[];

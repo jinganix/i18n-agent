@@ -1,7 +1,7 @@
 import { Annotation } from "@langchain/langgraph/web";
 import { join } from "path";
 import type { TaskBatch } from "./build.tasks.js";
-import { syncTranslationToFile } from "../../utils/file.syncer.js";
+import { syncTranslationToFile } from "@/utils/file.syncer.js";
 
 export interface SyncFilesState {
   config: {

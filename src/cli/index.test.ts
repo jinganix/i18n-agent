@@ -118,27 +118,27 @@ describe("executeIfMainModule", () => {
 
 describe("CLI Integration Tests", () => {
   test("should show help message", () => {
-    const output = execSync(`tsx ${cliPath} --help`).toString();
+    const output = execSync(`tsx -r tsconfig-paths/register ${cliPath} --help`).toString();
     expect(output).toContain("i18n agent CLI tool");
     expect(output).toContain("diff");
   });
 
   test("should show diff command help", () => {
-    const output = execSync(`tsx ${cliPath} diff --help`).toString();
+    const output = execSync(`tsx -r tsconfig-paths/register ${cliPath} diff --help`).toString();
     expect(output).toContain("Compare and analyze i18n differences");
     expect(output).toContain("--source");
     expect(output).toContain("--target");
   });
 
   test("should execute diff command without arguments", () => {
-    const output = execSync(`tsx ${cliPath} diff`).toString();
+    const output = execSync(`tsx -r tsconfig-paths/register ${cliPath} diff`).toString();
     expect(output).toContain("i18n-agent diff command executed");
     expect(output).toContain("Usage example");
   });
 
   test("should execute diff command with arguments", () => {
     const output = execSync(
-      `tsx ${cliPath} diff -s ./locales/en.json -t ./locales/zh.json -f json`,
+      `tsx -r tsconfig-paths/register ${cliPath} diff -s ./locales/en.json -t ./locales/zh.json -f json`,
     ).toString();
     expect(output).toContain("Comparing:");
     expect(output).toContain("Source: ./locales/en.json");
@@ -149,28 +149,33 @@ describe("CLI Integration Tests", () => {
 
 describe("CLI Entry Point", () => {
   test("should execute CLI when run directly", () => {
-    const output = execSync(`tsx ${cliEntryPath} --version`).toString();
+    const output = execSync(`tsx -r tsconfig-paths/register ${cliEntryPath} --version`).toString();
     expect(output).toMatch(/\d+\.\d+\.\d+/);
   });
 
   test("should parse arguments when executed directly", () => {
-    const output = execSync(`tsx ${cliEntryPath} diff --help`).toString();
+    const output = execSync(
+      `tsx -r tsconfig-paths/register ${cliEntryPath} diff --help`,
+    ).toString();
     expect(output).toContain("Compare and analyze i18n differences");
   });
 });
 
 describe("CLI Index Module Direct Execution", () => {
   test("should execute runCLI when module is run directly via tsx", () => {
-    const output = execSync(`tsx ${cliIndexPath} --version`, {
+    const output = execSync(`tsx -r tsconfig-paths/register ${cliIndexPath} --version`, {
       env: { ...process.env },
     }).toString();
     expect(output).toMatch(/\d+\.\d+\.\d+/);
   });
 
   test("should execute runCLI with diff command", () => {
-    const output = execSync(`tsx ${cliIndexPath} diff -s ./en.json -t ./zh.json`, {
-      env: { ...process.env },
-    }).toString();
+    const output = execSync(
+      `tsx -r tsconfig-paths/register ${cliIndexPath} diff -s ./en.json -t ./zh.json`,
+      {
+        env: { ...process.env },
+      },
+    ).toString();
     expect(output).toContain("i18n-agent diff command executed");
     expect(output).toContain("Source: ./en.json");
     expect(output).toContain("Target: ./zh.json");
