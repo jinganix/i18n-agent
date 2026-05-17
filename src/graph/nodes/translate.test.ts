@@ -47,6 +47,64 @@ describe("translate", () => {
     consoleSpy.mockRestore();
   });
 
+  it("should handle AI response with markdown code blocks", async () => {
+    const { callTranslationApi } = await import("../../utils/api.client.js");
+    vi.mocked(callTranslationApi).mockResolvedValueOnce('```json\n{"1.key1": "translated1"}\n```');
+
+    const tasks: TaskBatch[] = [
+      {
+        batchId: 1,
+        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
+        locale: "ja",
+        tokenCount: 25,
+      },
+    ];
+
+    const state = {
+      apiConfig: {
+        apiKey: "test-key",
+        baseUrl: "https://api.test.com/v1",
+        model: "gpt-4o-mini",
+      },
+      dryRun: false,
+      tasks,
+      translatedResults: {},
+    };
+
+    const result = await translateNode(state as typeof TranslateAnnotation.State);
+
+    expect(result.translatedResults!["batch_1"]["1.key1"]).toBe("translated1");
+  });
+
+  it("should handle AI response with json prefix", async () => {
+    const { callTranslationApi } = await import("../../utils/api.client.js");
+    vi.mocked(callTranslationApi).mockResolvedValueOnce('json {"1.key1": "translated1"}');
+
+    const tasks: TaskBatch[] = [
+      {
+        batchId: 1,
+        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
+        locale: "ja",
+        tokenCount: 25,
+      },
+    ];
+
+    const state = {
+      apiConfig: {
+        apiKey: "test-key",
+        baseUrl: "https://api.test.com/v1",
+        model: "gpt-4o-mini",
+      },
+      dryRun: false,
+      tasks,
+      translatedResults: {},
+    };
+
+    const result = await translateNode(state as typeof TranslateAnnotation.State);
+
+    expect(result.translatedResults!["batch_1"]["1.key1"]).toBe("translated1");
+  });
+
   it("should handle multiple batches", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
