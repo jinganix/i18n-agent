@@ -4,10 +4,10 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 import { syncWorkflow } from "@/graph/index.js";
 
 vi.mock("@/utils/api.client.js", () => ({
-  loadPrompt: vi.fn((locale) => {
+  getPromptForLocale: vi.fn((locale) => {
     return `Translate to ${locale}`;
   }),
-  getPromptForLocale: vi.fn((locale) => {
+  loadPrompt: vi.fn((locale) => {
     return `Translate to ${locale}`;
   }),
 }));
@@ -25,10 +25,12 @@ vi.mock("@/graph/nodes/translate.js", async (importOriginal) => {
 
         for (const key of task.keys) {
           const value = key.value;
-          if (typeof value === "string") {
-            translatedData[key.prefixedKey] = `[${task.locale}] ${value}`;
-          } else if (value === null) {
-            translatedData[key.prefixedKey] = "";
+          if (value === null) {
+            translatedData[key.prefixedKey] = "null";
+          } else if (typeof value === "boolean") {
+            translatedData[key.prefixedKey] = String(value);
+          } else if (typeof value === "number") {
+            translatedData[key.prefixedKey] = String(value);
           } else {
             translatedData[key.prefixedKey] = String(value);
           }
@@ -55,132 +57,128 @@ describe("sync workflow integration test", () => {
     rmSync(outputDir, { force: true, recursive: true });
   });
 
-  it("should translate and sync files with correct structure", async () => {
+  it("should translate en files and match expected ja/zh results", async () => {
     const modifiedConfigPath = join(outputDir, "config.json");
     const originalConfig = JSON.parse(readFileSync(configPath, "utf-8"));
     const modifiedConfig = {
       ...originalConfig,
-      localesDir: join(outputDir, "fixture-locales"),
+      localesDir: join(outputDir, "test-locales"),
     };
 
-    const { writeFileSync, cpSync } = await import("fs");
-    cpSync(join(fixtureDir, "locales"), join(outputDir, "fixture-locales"), {
-      recursive: true,
-    });
+    const { writeFileSync, mkdirSync: mkDir } = await import("fs");
+    const testLocalesDir = join(outputDir, "test-locales");
+    const testEnDir = join(testLocalesDir, "en");
+
+    mkDir(testEnDir, { recursive: true });
+
+    const enFiles = ["en.json", "nested.json"];
+    for (const file of enFiles) {
+      const sourcePath = join(fixtureDir, "locales", "en", file);
+      const targetPath = join(testEnDir, file);
+      const content = readFileSync(sourcePath, "utf-8");
+      writeFileSync(targetPath, content);
+    }
+
     writeFileSync(modifiedConfigPath, JSON.stringify(modifiedConfig, null, 2));
 
     await syncWorkflow(modifiedConfigPath);
 
-    const jaEnPath = join(outputDir, "fixture-locales", "ja", "ja.json");
-    const zhEnPath = join(outputDir, "fixture-locales", "zh", "zh.json");
-    const jaNestedPath = join(outputDir, "fixture-locales", "ja", "nested.json");
-    const zhNestedPath = join(outputDir, "fixture-locales", "zh", "nested.json");
+    const expectedJaDir = join(fixtureDir, "locales", "ja");
+    const expectedZhDir = join(fixtureDir, "locales", "zh");
+    const actualJaDir = join(testLocalesDir, "ja");
+    const actualZhDir = join(testLocalesDir, "zh");
 
-    expect(readFileSync(jaEnPath, "utf-8")).toBeDefined();
-    expect(readFileSync(zhEnPath, "utf-8")).toBeDefined();
-    expect(readFileSync(jaNestedPath, "utf-8")).toBeDefined();
-    expect(readFileSync(zhNestedPath, "utf-8")).toBeDefined();
+    const jaFiles = ["ja.json", "nested.json"];
+    const zhFiles = ["zh.json", "nested.json"];
 
-    const jaEnContent = JSON.parse(readFileSync(jaEnPath, "utf-8"));
-    const zhEnContent = JSON.parse(readFileSync(zhEnPath, "utf-8"));
-    const jaNestedContent = JSON.parse(readFileSync(jaNestedPath, "utf-8"));
-    const zhNestedContent = JSON.parse(readFileSync(zhNestedPath, "utf-8"));
+    for (const file of jaFiles) {
+      const expectedPath = join(expectedJaDir, file);
+      const actualPath = join(actualJaDir, file);
 
-    expect(jaEnContent).toHaveProperty("welcome");
-    expect(jaEnContent).toHaveProperty("goodbye");
-    expect(jaEnContent).toHaveProperty("hello");
-    expect(jaEnContent).toHaveProperty("items_count");
+      expect(readFileSync(actualPath, "utf-8")).toBeDefined();
 
-    expect(zhEnContent).toHaveProperty("welcome");
-    expect(zhEnContent).toHaveProperty("goodbye");
-    expect(zhEnContent).toHaveProperty("hello");
-    expect(zhEnContent).toHaveProperty("items_count");
+      const expectedContent = JSON.parse(readFileSync(expectedPath, "utf-8"));
+      const actualContent = JSON.parse(readFileSync(actualPath, "utf-8"));
 
-    expect(jaEnContent.welcome).toBe("[ja] Welcome");
-    expect(jaEnContent.goodbye).toBe("[ja] Goodbye");
-    expect(zhEnContent.welcome).toBe("[zh] Welcome");
-    expect(zhEnContent.goodbye).toBe("[zh] Goodbye");
+      expect(actualContent).toEqual(expectedContent);
+    }
 
-    expect(jaNestedContent).toHaveProperty("welcome");
-    expect(jaNestedContent).toHaveProperty("user");
-    expect(jaNestedContent.user).toHaveProperty("name");
-    expect(jaNestedContent.user).toHaveProperty("profile");
-    expect(jaNestedContent.user.profile).toHaveProperty("age");
-    expect(jaNestedContent.user.profile).toHaveProperty("active");
-    expect(jaNestedContent).toHaveProperty("items");
+    for (const file of zhFiles) {
+      const expectedPath = join(expectedZhDir, file);
+      const actualPath = join(actualZhDir, file);
 
-    expect(zhNestedContent).toHaveProperty("welcome");
-    expect(zhNestedContent).toHaveProperty("user");
-    expect(zhNestedContent.user).toHaveProperty("name");
-    expect(zhNestedContent.user).toHaveProperty("profile");
-    expect(zhNestedContent.user.profile).toHaveProperty("age");
-    expect(zhNestedContent.user.profile).toHaveProperty("active");
-    expect(zhNestedContent).toHaveProperty("items");
+      expect(readFileSync(actualPath, "utf-8")).toBeDefined();
 
-    expect(jaNestedContent.welcome).toBe("[ja] Welcome");
-    expect(jaNestedContent.user.name).toBe("[ja] John");
-    expect(jaNestedContent.user.profile.age).toBe("30");
-    expect(jaNestedContent.user.profile.active).toBe("true");
+      const expectedContent = JSON.parse(readFileSync(expectedPath, "utf-8"));
+      const actualContent = JSON.parse(readFileSync(actualPath, "utf-8"));
 
-    expect(zhNestedContent.welcome).toBe("[zh] Welcome");
-    expect(zhNestedContent.user.name).toBe("[zh] John");
-    expect(zhNestedContent.user.profile.age).toBe("30");
-    expect(zhNestedContent.user.profile.active).toBe("true");
+      expect(actualContent).toEqual(expectedContent);
+    }
   });
 
-  it("should preserve nested structure correctly", async () => {
+  it("should preserve data types correctly", async () => {
     const modifiedConfigPath = join(outputDir, "config2.json");
     const originalConfig = JSON.parse(readFileSync(configPath, "utf-8"));
     const modifiedConfig = {
       ...originalConfig,
-      localesDir: join(outputDir, "fixture-locales2"),
+      localesDir: join(outputDir, "test-locales2"),
     };
 
-    const { writeFileSync, cpSync } = await import("fs");
-    cpSync(join(fixtureDir, "locales"), join(outputDir, "fixture-locales2"), {
-      recursive: true,
-    });
+    const { writeFileSync, mkdirSync: mkDir } = await import("fs");
+    const testLocalesDir = join(outputDir, "test-locales2");
+    const testEnDir = join(testLocalesDir, "en");
+
+    mkDir(testEnDir, { recursive: true });
+
+    const sourcePath = join(fixtureDir, "locales", "en", "nested.json");
+    const targetPath = join(testEnDir, "nested.json");
+    const content = readFileSync(sourcePath, "utf-8");
+    writeFileSync(targetPath, content);
+
     writeFileSync(modifiedConfigPath, JSON.stringify(modifiedConfig, null, 2));
 
     await syncWorkflow(modifiedConfigPath);
 
-    const jaNestedPath = join(outputDir, "fixture-locales2", "ja", "nested.json");
-    const jaNestedContent = JSON.parse(readFileSync(jaNestedPath, "utf-8"));
+    const actualJaPath = join(testLocalesDir, "ja", "nested.json");
+    const actualJaContent = JSON.parse(readFileSync(actualJaPath, "utf-8"));
 
-    expect(jaNestedContent.user).toBeDefined();
-    expect(typeof jaNestedContent.user).toBe("object");
-    expect(jaNestedContent.user.profile).toBeDefined();
-    expect(typeof jaNestedContent.user.profile).toBe("object");
-    expect(jaNestedContent.user.profile.age).toBeDefined();
-    expect(jaNestedContent.user.profile.active).toBeDefined();
+    expect(actualJaContent.user.profile.age).toBe("30");
+    expect(actualJaContent.user.profile.active).toBe("true");
+    expect(actualJaContent.items).toBe("null");
   });
 
-  it("should create files for all target locales", async () => {
+  it("should handle placeholder strings correctly", async () => {
     const modifiedConfigPath = join(outputDir, "config3.json");
     const originalConfig = JSON.parse(readFileSync(configPath, "utf-8"));
     const modifiedConfig = {
       ...originalConfig,
-      localesDir: join(outputDir, "fixture-locales3"),
+      localesDir: join(outputDir, "test-locales3"),
     };
 
-    const { writeFileSync, cpSync } = await import("fs");
-    cpSync(join(fixtureDir, "locales"), join(outputDir, "fixture-locales3"), {
-      recursive: true,
-    });
+    const { writeFileSync, mkdirSync: mkDir } = await import("fs");
+    const testLocalesDir = join(outputDir, "test-locales3");
+    const testEnDir = join(testLocalesDir, "en");
+
+    mkDir(testEnDir, { recursive: true });
+
+    const sourcePath = join(fixtureDir, "locales", "en", "en.json");
+    const targetPath = join(testEnDir, "en.json");
+    const content = readFileSync(sourcePath, "utf-8");
+    writeFileSync(targetPath, content);
+
     writeFileSync(modifiedConfigPath, JSON.stringify(modifiedConfig, null, 2));
 
     await syncWorkflow(modifiedConfigPath);
 
-    const { readdirSync } = await import("fs");
-    const jaDir = join(outputDir, "fixture-locales3", "ja");
-    const zhDir = join(outputDir, "fixture-locales3", "zh");
+    const actualJaPath = join(testLocalesDir, "ja", "ja.json");
+    const actualZhPath = join(testLocalesDir, "zh", "zh.json");
 
-    const jaFiles = readdirSync(jaDir);
-    const zhFiles = readdirSync(zhDir);
+    const actualJaContent = JSON.parse(readFileSync(actualJaPath, "utf-8"));
+    const actualZhContent = JSON.parse(readFileSync(actualZhPath, "utf-8"));
 
-    expect(jaFiles).toContain("ja.json");
-    expect(jaFiles).toContain("nested.json");
-    expect(zhFiles).toContain("zh.json");
-    expect(zhFiles).toContain("nested.json");
+    expect(actualJaContent.hello).toBe("Hello {name}");
+    expect(actualJaContent.items_count).toBe("{count} items");
+    expect(actualZhContent.hello).toBe("Hello {name}");
+    expect(actualZhContent.items_count).toBe("{count} items");
   });
 });

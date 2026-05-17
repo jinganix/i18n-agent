@@ -1,5 +1,7 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { callTranslationApi, getPromptForLocale, loadPrompt } from "./api.client.js";
+
+vi.stubGlobal("fetch", vi.fn());
 
 describe("api.client", () => {
   it("should load prompt with replacements", () => {
@@ -34,6 +36,12 @@ describe("api.client", () => {
   });
 
   it("should return empty string for translation API call", async () => {
+    const mockFetch = vi.mocked(fetch);
+    mockFetch.mockResolvedValueOnce({
+      json: async () => ({ choices: [{ message: { content: "" } }] }),
+      ok: true,
+    } as Response);
+
     const result = await callTranslationApi(
       { apiKey: "test", baseUrl: "https://test.com" },
       { messages: [], model: "test" },

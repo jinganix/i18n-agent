@@ -2,12 +2,19 @@ import { Annotation } from "@langchain/langgraph/web";
 import { readFileSync } from "fs";
 import { resolve } from "path";
 
+export interface ApiConfig {
+  baseUrl: string;
+  apiKey: string;
+  model?: string;
+  timeout?: number;
+}
+
 export interface SyncConfig {
   sourceLocale: string;
   targetLocales: string[];
   localesDir: string;
-  model?: string;
-  batchSize?: number;
+  tokenSize?: number;
+  api?: ApiConfig;
 }
 
 export interface SyncState {

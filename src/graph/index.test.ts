@@ -1,6 +1,16 @@
 import { describe, it, expect, vi } from "vitest";
 import { runWorkflow, syncWorkflow } from "./index.js";
 
+vi.mock("@/utils/api.client.js", () => ({
+  callTranslationApi: vi.fn(() =>
+    Promise.resolve(
+      '{"1.welcome": "Welcome", "1.goodbye": "Goodbye", "1.hello": "Hello {name}", "1.items_count": "{count} items", "2.welcome": "Welcome", "2.user.name": "John", "2.user.profile.age": "30", "2.user.profile.active": "true", "2.items": "null"}',
+    ),
+  ),
+  getPromptForLocale: vi.fn(() => "Mock prompt template"),
+  loadPrompt: vi.fn((_template, replacements) => `Loaded: ${replacements.targetLocale}`),
+}));
+
 describe("graph/index", () => {
   it("should run workflow and output hello world", async () => {
     const consoleSpy = vi.spyOn(console, "log");
@@ -22,7 +32,7 @@ describe("graph/index", () => {
   it("should sync workflow with source path", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-    await syncWorkflow("tests/i18n-agent.config.json", "tests/locales/en/en.json");
+    await syncWorkflow("tests/i18n-agent.config.json", "tests/fixture/locales/en/en.json");
 
     expect(consoleSpy).toHaveBeenCalled();
 

@@ -4,11 +4,16 @@ import { scanFilesNode, ScanFilesAnnotation } from "./scan.files.js";
 
 describe("scan.files", () => {
   const mockConfig: SyncConfig = {
-    batchSize: 50,
-    localesDir: "./tests/locales",
-    model: "gpt-4o-mini",
+    api: {
+      apiKey: "sk-test-key",
+      baseUrl: "https://api.openai.com/v1",
+      model: "gpt-4o-mini",
+      timeout: 30000,
+    },
+    localesDir: "./tests/fixture/locales",
     sourceLocale: "en",
     targetLocales: ["ja", "zh"],
+    tokenSize: 3000,
   };
 
   it("should scan all files in source locale directory", async () => {
@@ -68,7 +73,7 @@ describe("scan.files", () => {
     const state = {
       config: mockConfig,
       files: [],
-      sourcePath: "./tests/locales/en/en.json",
+      sourcePath: "./tests/fixture/locales/en/en.json",
     };
 
     const result = await scanFilesNode(state as typeof ScanFilesAnnotation.State);
@@ -117,7 +122,7 @@ describe("scan.files", () => {
     const state = {
       config: mockConfig,
       files: [],
-      sourcePath: "./tests/locales/en/file.txt",
+      sourcePath: "./tests/fixture/locales/en/file.txt",
     };
 
     await expect(scanFilesNode(state as typeof ScanFilesAnnotation.State)).rejects.toThrow(
@@ -136,7 +141,7 @@ describe("scan.files", () => {
     const state = {
       config: mockConfig,
       files: [],
-      sourcePath: "./tests/locales/en/en.json",
+      sourcePath: "./tests/fixture/locales/en/en.json",
     };
 
     await expect(scanFilesNode(state as typeof ScanFilesAnnotation.State)).rejects.toThrow(

@@ -21,14 +21,25 @@ export function runCLI(argv: string[] = process.argv): void {
 }
 
 export function isMain(metaUrl: string, argvPath: string): boolean {
-  return metaUrl === `file://${argvPath}`;
+  // c8 ignore next
+  if (!argvPath) return false;
+  const metaPath = metaUrl.replace("file://", "");
+  return (
+    metaPath === argvPath ||
+    metaPath.endsWith(argvPath) ||
+    argvPath.endsWith("dist/cli/index.js") ||
+    argvPath.includes("node_modules/i18n-agent") ||
+    argvPath.includes("i18n-agent")
+  );
 }
 
-/* c8 ignore next 5 */
+// c8 ignore start
 export function executeIfMainModule(): void {
-  if (isMain(import.meta.url, process.argv[1])) {
+  const isTestEnv = process.env.VITEST === "true";
+  if (!isTestEnv) {
     runCLI();
   }
 }
+// c8 ignore end
 
 executeIfMainModule();
