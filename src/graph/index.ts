@@ -1,4 +1,5 @@
 import { StateGraph, START, END } from "@langchain/langgraph/web";
+import { buildTasksNode, BuildTasksAnnotation } from "./nodes/build.tasks.js";
 import { detectChanges, StateAnnotation } from "./nodes/detect.changes.js";
 import { flattenKeysNode, FlattenKeysAnnotation } from "./nodes/flatten.keys.js";
 import { loadConfigNode, SyncAnnotation } from "./nodes/load.config.js";
@@ -39,10 +40,25 @@ export async function syncWorkflow(configPath: string, sourcePath?: string): Pro
     flattenedData: {},
   };
 
-  await new StateGraph(FlattenKeysAnnotation)
+  const flattenResult = await new StateGraph(FlattenKeysAnnotation)
     .addNode("flattenKeys", flattenKeysNode)
     .addEdge(START, "flattenKeys")
     .addEdge("flattenKeys", END)
     .compile()
     .invoke(flattenState);
+
+  const buildState = {
+    config: (configResult as typeof SyncAnnotation.State).config!,
+    files: (scanResult as typeof ScanFilesAnnotation.State).files,
+    flattenedData: (flattenResult as typeof FlattenKeysAnnotation.State).flattenedData,
+    lastCompletedBatchId: 0,
+    tasks: [],
+  };
+
+  await new StateGraph(BuildTasksAnnotation)
+    .addNode("buildTasks", buildTasksNode)
+    .addEdge(START, "buildTasks")
+    .addEdge("buildTasks", END)
+    .compile()
+    .invoke(buildState);
 }
