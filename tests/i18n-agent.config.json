@@ -1,7 +1,7 @@
 {
   "sourceLocale": "en",
   "targetLocales": ["ja", "zh"],
-  "localesDir": "./locales",
+  "localesDir": "./tests/locales",
   "model": "gpt-4o-mini",
   "batchSize": 50
 }
