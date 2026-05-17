@@ -28,4 +28,16 @@ describe("graph/index", () => {
 
     consoleSpy.mockRestore();
   });
+
+  it("should flatten keys in sync workflow", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    await syncWorkflow("tests/i18n-agent.config.json");
+
+    // Should log file flattening
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Flattened file"));
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Total files flattened"));
+
+    consoleSpy.mockRestore();
+  });
 });
