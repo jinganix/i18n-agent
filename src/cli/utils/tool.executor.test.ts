@@ -5,10 +5,6 @@ vi.mock("../commands/sync.js", () => ({
   executeSync: vi.fn(() => Promise.resolve()),
 }));
 
-vi.mock("../commands/diff.js", () => ({
-  executeDiff: vi.fn(() => Promise.resolve()),
-}));
-
 describe("commands/tool.executor", () => {
   it("should execute sync tool successfully", async () => {
     const result = await executeToolCall("sync", {
@@ -43,26 +39,6 @@ describe("commands/tool.executor", () => {
     expect(result.message).toBe("Files synced successfully");
   });
 
-  it("should execute diff tool successfully", async () => {
-    const result = await executeToolCall("diff", {
-      format: "text",
-      source: "en.json",
-      target: "zh.json",
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.message).toBe("Diff analysis completed");
-  });
-
-  it("should fail diff without required parameters", async () => {
-    const result = await executeToolCall("diff", {
-      source: "en.json",
-    });
-
-    expect(result.success).toBe(false);
-    expect(result.message).toContain("Missing required parameters");
-  });
-
   it("should return error for unknown tool", async () => {
     const result = await executeToolCall("unknown_tool", {});
 
@@ -78,16 +54,6 @@ describe("commands/tool.executor", () => {
 
     expect(result.success).toBe(true);
     expect(result.message).toBe("Files synced successfully");
-  });
-
-  it("should use default format for diff when not provided", async () => {
-    const result = await executeToolCall("diff", {
-      source: "en.json",
-      target: "zh.json",
-    });
-
-    expect(result.success).toBe(true);
-    expect(result.message).toBe("Diff analysis completed");
   });
 
   it("should handle tool execution error", async () => {

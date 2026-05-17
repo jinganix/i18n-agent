@@ -1,5 +1,3 @@
-import { executeDiff } from "../commands/diff.js";
-import type { DiffOptions } from "../commands/diff.js";
 import { executeSync } from "../commands/sync.js";
 import type { SyncOptions } from "../commands/sync.js";
 
@@ -36,28 +34,6 @@ export async function executeToolCall(
 
         return {
           message: "Files synced successfully",
-          success: true,
-        };
-      }
-
-      case "diff": {
-        const diffParams = parameters as Partial<DiffOptions>;
-        if (!diffParams.source || !diffParams.target) {
-          return {
-            message: "Missing required parameters: source and target",
-            success: false,
-          };
-        }
-
-        console.log(`\n🔍 Executing diff...`);
-        await executeDiff({
-          format: (diffParams.format as "json" | "text" | "table") || "text",
-          source: diffParams.source as string,
-          target: diffParams.target as string,
-        });
-
-        return {
-          message: "Diff analysis completed",
           success: true,
         };
       }

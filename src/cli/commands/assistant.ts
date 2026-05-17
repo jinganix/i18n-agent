@@ -45,29 +45,6 @@ export const AVAILABLE_TOOLS: Tool[] = [
       type: "object",
     },
   },
-  {
-    description: "Compare and analyze differences between i18n files",
-    name: "diff",
-    parameters: {
-      properties: {
-        format: {
-          description: "Output format (json, text, table)",
-          enum: ["json", "text", "table"],
-          type: "string",
-        },
-        source: {
-          description: "Source locale file path",
-          type: "string",
-        },
-        target: {
-          description: "Target locale file path",
-          type: "string",
-        },
-      },
-      required: ["source", "target"],
-      type: "object",
-    },
-  },
 ];
 
 const SYSTEM_PROMPT = `You are an i18n (internationalization) assistant that helps users manage translation tasks.
@@ -109,17 +86,6 @@ Response: {
     "dryRun": true
   },
   "explanation": "I'll preview what would change when syncing all files without making actual changes"
-}
-
-User: "What's the difference between en.json and zh.json?"
-Response: {
-  "tool": "diff",
-  "parameters": {
-    "source": "en.json",
-    "target": "zh.json",
-    "format": "text"
-  },
-  "explanation": "I'll compare the English and Chinese translation files to show you the differences"
 }
 
 Always respond with valid JSON only, no additional text.`;

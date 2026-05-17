@@ -23,22 +23,28 @@ describe("createProgram", () => {
     expect(program.version()).toMatch(/\d+\.\d+\.\d+/);
   });
 
-  test("should have diff command registered", () => {
+  test("should have sync command registered", () => {
     const program = createProgram();
     const commands = program.commands.map((cmd) => cmd.name());
-    expect(commands).toContain("diff");
+    expect(commands).toContain("sync");
   });
 });
 
 describe("runCLI", () => {
-  test("should run CLI with provided arguments", () => {
+  test("should run CLI with provided arguments", async () => {
     const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as () => never);
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    expect(() =>
-      runCLI(["node", "test", "diff", "-s", "./en.json", "-t", "./zh.json"]),
-    ).not.toThrow();
+    runCLI(["node", "test", "sync", "-c", "./test-config.json"]);
+
+    // Wait for async action to complete
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    // process.exit should be called due to missing config
+    expect(exitSpy).toHaveBeenCalled();
 
     exitSpy.mockRestore();
+    errorSpy.mockRestore();
   });
 
   test("should run CLI with help command", () => {
@@ -72,28 +78,15 @@ describe("isMain", () => {
 });
 
 describe("executeIfMainModule", () => {
-  test("should call runCLI when isMain returns true", () => {
-    const originalArgv = process.argv;
+  test("should verify isMain logic works correctly", () => {
     const metaUrl = "file:///test/path/index.ts";
     const argvPath = "/test/path/index.ts";
-    process.argv = ["node", argvPath, "diff", "-s", "./en.json", "-t", "./zh.json"];
 
-    const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-    const exitSpy = vi.spyOn(process, "exit").mockImplementation((() => {}) as () => never);
-
-    // Verify isMain returns true
+    // Verify isMain returns true when paths match
     expect(isMain(metaUrl, argvPath)).toBe(true);
 
-    // Manually execute the logic that would happen in executeIfMainModule
-    if (isMain(metaUrl, argvPath)) {
-      runCLI(process.argv);
-    }
-
-    expect(consoleSpy).toHaveBeenCalledWith("i18n-agent diff command executed");
-
-    consoleSpy.mockRestore();
-    exitSpy.mockRestore();
-    process.argv = originalArgv;
+    // Verify isMain returns false when paths don't match
+    expect(isMain(metaUrl, "/different/path.ts")).toBe(false);
   });
 
   test("should not call runCLI when isMain returns false", () => {
@@ -122,37 +115,15 @@ describe("CLI Integration Tests", () => {
       env: { ...process.env, NODE_ENV: undefined, VITEST: undefined },
     }).toString();
     expect(output).toContain("i18n agent CLI tool");
-    expect(output).toContain("diff");
+    expect(output).toContain("sync");
   });
 
-  test("should show diff command help", () => {
-    const output = execSync(`tsx -r tsconfig-paths/register ${cliPath} diff --help`, {
+  test("should show sync command help", () => {
+    const output = execSync(`tsx -r tsconfig-paths/register ${cliPath} sync --help`, {
       env: { ...process.env, NODE_ENV: undefined, VITEST: undefined },
     }).toString();
-    expect(output).toContain("Compare and analyze i18n differences");
-    expect(output).toContain("--source");
-    expect(output).toContain("--target");
-  });
-
-  test("should execute diff command without arguments", () => {
-    const output = execSync(`tsx -r tsconfig-paths/register ${cliPath} diff`, {
-      env: { ...process.env, NODE_ENV: undefined, VITEST: undefined },
-    }).toString();
-    expect(output).toContain("i18n-agent diff command executed");
-    expect(output).toContain("Usage example");
-  });
-
-  test("should execute diff command with arguments", () => {
-    const output = execSync(
-      `tsx -r tsconfig-paths/register ${cliPath} diff -s ./locales/en.json -t ./locales/zh.json -f json`,
-      {
-        env: { ...process.env, NODE_ENV: undefined, VITEST: undefined },
-      },
-    ).toString();
-    expect(output).toContain("Comparing:");
-    expect(output).toContain("Source: ./locales/en.json");
-    expect(output).toContain("Target: ./locales/zh.json");
-    expect(output).toContain("Format: json");
+    expect(output).toContain("Sync i18n files based on configuration");
+    expect(output).toContain("--config");
   });
 });
 
@@ -165,10 +136,10 @@ describe("CLI Entry Point", () => {
   });
 
   test("should parse arguments when executed directly", () => {
-    const output = execSync(`tsx -r tsconfig-paths/register ${cliEntryPath} diff --help`, {
+    const output = execSync(`tsx -r tsconfig-paths/register ${cliEntryPath} sync --help`, {
       env: { ...process.env, NODE_ENV: undefined, VITEST: undefined },
     }).toString();
-    expect(output).toContain("Compare and analyze i18n differences");
+    expect(output).toContain("Sync i18n files based on configuration");
   });
 });
 
@@ -180,15 +151,11 @@ describe("CLI Index Module Direct Execution", () => {
     expect(output).toMatch(/\d+\.\d+\.\d+/);
   });
 
-  test("should execute runCLI with diff command", () => {
-    const output = execSync(
-      `tsx -r tsconfig-paths/register ${cliIndexPath} diff -s ./en.json -t ./zh.json`,
-      {
-        env: { ...process.env, NODE_ENV: undefined, VITEST: undefined },
-      },
-    ).toString();
-    expect(output).toContain("i18n-agent diff command executed");
-    expect(output).toContain("Source: ./en.json");
-    expect(output).toContain("Target: ./zh.json");
+  test("should show help for sync command", () => {
+    const output = execSync(`tsx -r tsconfig-paths/register ${cliIndexPath} sync --help`, {
+      env: { ...process.env, NODE_ENV: undefined, VITEST: undefined },
+    }).toString();
+    expect(output).toContain("Sync i18n files based on configuration");
+    expect(output).toContain("--config");
   });
 });

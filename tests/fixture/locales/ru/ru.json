@@ -3,5 +3,5 @@
   "goodbye": "До свидания",
   "hello": "Привет, {name}",
   "items_count": "{count} элементов",
-  "apples": "У нее {count, plural, =0 {нет яблок} one {# яблоко} few {# яблока} other {# яблок}}"
+  "apples": "У неё {count, plural, =0 {нет яблок} one {# яблоко} few {# яблока} other {# яблок}}"
 }

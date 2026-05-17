@@ -22,10 +22,10 @@ vi.mock("@/utils/file.syncer.js", () => ({
 }));
 
 describe("graph/index", () => {
-  it("should run workflow and output hello world", async () => {
+  it("should run workflow and detect changes", async () => {
     const consoleSpy = vi.spyOn(console, "log");
     await runWorkflow();
-    expect(consoleSpy).toHaveBeenCalledWith("hello world");
+    expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Change detection completed"));
     consoleSpy.mockRestore();
   });
 
