@@ -1,7 +1,7 @@
 import { Annotation } from "@langchain/langgraph/web";
 import { readFileSync } from "fs";
-import type { FileItem } from "../../utils/file.scanner.js";
-import { normalizeKeys, NormalizedResult } from "../../utils/normalize.keys.js";
+import type { FileItem } from "@/utils/file.scanner.js";
+import { normalizeKeys, NormalizedResult } from "@/utils/normalize.keys.js";
 
 export interface FlattenKeysState {
   files: FileItem[];

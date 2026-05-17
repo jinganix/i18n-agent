@@ -6,6 +6,7 @@ import { loadConfigNode, SyncAnnotation } from "./nodes/load.config.js";
 import { scanFilesNode, ScanFilesAnnotation } from "./nodes/scan.files.js";
 import { syncFilesNode, SyncFilesAnnotation } from "./nodes/sync.files.js";
 import { translateNode, TranslateAnnotation } from "./nodes/translate.js";
+import { validateResultsNode, ValidateResultsAnnotation } from "./nodes/validate.results.js";
 
 export async function runWorkflow(): Promise<void> {
   await new StateGraph(StateAnnotation)
@@ -75,6 +76,19 @@ export async function syncWorkflow(configPath: string, sourcePath?: string): Pro
     .addEdge("translate", END)
     .compile()
     .invoke(translateState);
+
+  const validateState = {
+    tasks: (buildResult as typeof BuildTasksAnnotation.State).tasks,
+    translatedResults: (translateResult as typeof TranslateAnnotation.State).translatedResults,
+    validationResults: [],
+  };
+
+  await new StateGraph(ValidateResultsAnnotation)
+    .addNode("validateResults", validateResultsNode)
+    .addEdge(START, "validateResults")
+    .addEdge("validateResults", END)
+    .compile()
+    .invoke(validateState);
 
   const syncState = {
     config: (configResult as typeof SyncAnnotation.State).config!,

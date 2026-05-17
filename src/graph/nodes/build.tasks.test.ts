@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { buildTasksNode, BuildTasksAnnotation } from "./build.tasks.js";
-import type { FileItem } from "../../utils/file.scanner.js";
+import type { FileItem } from "@/utils/file.scanner.js";
 
 vi.mock("../../utils/token.estimator.js", () => ({
   estimateObjectTokens: vi.fn((obj) => {

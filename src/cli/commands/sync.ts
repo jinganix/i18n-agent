@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { syncWorkflow } from "../../graph/index.js";
+import { syncWorkflow } from "@/graph/index.js";
 
 export interface SyncOptions {
   config?: string;
