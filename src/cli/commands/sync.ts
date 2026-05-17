@@ -16,11 +16,9 @@ export async function executeSync(options: SyncOptions): Promise<void> {
 
   try {
     await syncWorkflow(options.config, options.source, options.dryRun);
-    // c8 ignore start
   } catch (error) {
     console.error(`Error: ${(error as Error).message}`);
     process.exit(1);
-    // c8 ignore end
   }
 }
 

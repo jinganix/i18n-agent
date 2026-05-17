@@ -1,6 +1,7 @@
 import { Annotation } from "@langchain/langgraph/web";
 import { readFileSync } from "fs";
 import type { FileItem } from "@/utils/file.scanner.js";
+import { replaceReducer } from "@/utils/langgraph.helpers.js";
 import { normalizeKeys, NormalizedResult } from "@/utils/normalize.keys.js";
 
 export interface FlattenKeysState {
@@ -11,13 +12,11 @@ export interface FlattenKeysState {
 export const FlattenKeysAnnotation = Annotation.Root({
   files: Annotation<FileItem[]>({
     default: () => [],
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   flattenedData: Annotation<Record<string, NormalizedResult>>({
     default: () => ({}),
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
 });
 

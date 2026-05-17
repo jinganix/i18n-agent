@@ -15,7 +15,7 @@ describe("build.tasks", () => {
 
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: "./tests/fixture/locales",
         sourceLocale: "en",
         targetLocales: ["ja", "zh"],
         tokenSize: 100,
@@ -44,7 +44,7 @@ describe("build.tasks", () => {
   it("should not mix different locales in same batch", async () => {
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: "./tests/fixture/locales",
         sourceLocale: "en",
         targetLocales: ["ja", "zh"],
         tokenSize: 1000,
@@ -78,7 +78,7 @@ describe("build.tasks", () => {
   it("should resume from last completed batch", async () => {
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: "./tests/fixture/locales",
         sourceLocale: "en",
         targetLocales: ["ja"],
         tokenSize: 1000,
@@ -101,7 +101,7 @@ describe("build.tasks", () => {
   it("should split into multiple batches when exceeding token size", async () => {
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: "./tests/fixture/locales",
         sourceLocale: "en",
         targetLocales: ["ja"],
         tokenSize: 10,
@@ -126,7 +126,7 @@ describe("build.tasks", () => {
   it("should use default tokenSize when not configured", async () => {
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: "./tests/fixture/locales",
         sourceLocale: "en",
         targetLocales: ["ja"],
       },
@@ -149,7 +149,7 @@ describe("build.tasks", () => {
   it("should handle empty flattened data", async () => {
     const state = {
       config: {
-        localesDir: "./tests/locales",
+        localesDir: "./tests/fixture/locales",
         sourceLocale: "en",
         targetLocales: ["ja"],
         tokenSize: 1000,

@@ -1,7 +1,7 @@
 {
-  "welcome": "欢迎",
+  "welcome": "Добро пожаловать",
   "user": {
-    "name": "John",
+    "name": "Джон",
     "profile": {
       "age": 30,
       "active": true

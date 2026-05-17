@@ -69,4 +69,37 @@ describe("commands/tool.executor", () => {
     expect(result.success).toBe(false);
     expect(result.message).toContain("Unknown tool");
   });
+
+  it("should use sourcePath parameter for sync", async () => {
+    const result = await executeToolCall("sync", {
+      config: "./test-config.json",
+      sourcePath: "bar.json",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.message).toBe("Files synced successfully");
+  });
+
+  it("should use default format for diff when not provided", async () => {
+    const result = await executeToolCall("diff", {
+      source: "en.json",
+      target: "zh.json",
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.message).toBe("Diff analysis completed");
+  });
+
+  it("should handle tool execution error", async () => {
+    const { executeSync } = await import("../commands/sync.js");
+    vi.mocked(executeSync).mockRejectedValueOnce(new Error("Sync failed"));
+
+    const result = await executeToolCall("sync", {
+      config: "./test-config.json",
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain("Tool execution failed");
+    expect(result.message).toContain("Sync failed");
+  });
 });

@@ -7,10 +7,10 @@
   },
   "scripts": {
     "check": "npm run lint && npm run coverage",
-    "test": "vitest",
+    "test": "vitest run",
     "coverage": "vitest run --coverage",
-    "lint": "eslint ./src",
-    "lint:fix": "eslint ./src --fix",
+    "lint": "eslint ./src ./tests",
+    "lint:fix": "eslint ./src ./tests --fix",
     "build": "vite build && cp -r src/prompts dist/prompts && chmod +x dist/cli/index.js",
     "cli": "tsx -r tsconfig-paths/register src/cli/index.ts",
     "cz": "cz",

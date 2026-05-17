@@ -173,4 +173,26 @@ describe("translate", () => {
 
     consoleSpy.mockRestore();
   });
+
+  it("should throw error when apiConfig is missing in non-dry-run mode", async () => {
+    const tasks: TaskBatch[] = [
+      {
+        batchId: 1,
+        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
+        locale: "ja",
+        tokenCount: 25,
+      },
+    ];
+
+    const state = {
+      apiConfig: undefined,
+      dryRun: false,
+      tasks,
+      translatedResults: {},
+    };
+
+    await expect(translateNode(state as typeof TranslateAnnotation.State)).rejects.toThrow(
+      "API configuration is required for translation",
+    );
+  });
 });

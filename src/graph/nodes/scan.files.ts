@@ -3,6 +3,7 @@ import { statSync } from "fs";
 import { join, relative, resolve } from "path";
 import type { SyncConfig } from "./load.config.js";
 import { collectJsonFiles, logFileList, type FileItem } from "@/utils/file.scanner.js";
+import { replaceReducer } from "@/utils/langgraph.helpers.js";
 
 export interface ScanFilesState {
   config: SyncConfig | null;
@@ -13,18 +14,15 @@ export interface ScanFilesState {
 export const ScanFilesAnnotation = Annotation.Root({
   config: Annotation<SyncConfig | null>({
     default: () => null,
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   files: Annotation<FileItem[]>({
     default: () => [],
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   sourcePath: Annotation<string | undefined>({
     default: () => undefined,
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
 });
 
@@ -70,7 +68,6 @@ export async function scanFilesNode(
   } else if (stats.isDirectory()) {
     collectJsonFiles(targetPath, sourceLocaleDir, files, 1);
   } else {
-    // c8 ignore next
     throw new Error(`Invalid path: ${targetPath}`);
   }
 

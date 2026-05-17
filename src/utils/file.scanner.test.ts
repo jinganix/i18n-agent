@@ -68,6 +68,41 @@ describe("file.scanner", () => {
       expect(files[0].id).toBe(10);
       expect(nextId).toBe(11);
     });
+
+    it("should recursively collect JSON files from subdirectories", async () => {
+      const { readdirSync, statSync } = await import("fs");
+
+      // First call: root directory with one file and one subdirectory
+      // Second call: subdirectory with one file
+      vi.mocked(readdirSync)
+        .mockReturnValueOnce(["file1.json", "subdir"] as unknown as ReturnType<typeof readdirSync>)
+        .mockReturnValueOnce(["file2.json"] as unknown as ReturnType<typeof readdirSync>);
+
+      // First two calls are for root dir entries, third call is for subdir entry
+      vi.mocked(statSync)
+        .mockReturnValueOnce({
+          isDirectory: () => false,
+          isFile: () => true,
+        } as unknown as ReturnType<typeof statSync>)
+        .mockReturnValueOnce({
+          isDirectory: () => true,
+          isFile: () => false,
+        } as unknown as ReturnType<typeof statSync>)
+        .mockReturnValueOnce({
+          isDirectory: () => false,
+          isFile: () => true,
+        } as unknown as ReturnType<typeof statSync>);
+
+      const files: FileItem[] = [];
+      const nextId = collectJsonFiles("/test/dir", "/test/dir", files, 1);
+
+      expect(files).toHaveLength(2);
+      expect(files[0].id).toBe(1);
+      expect(files[0].relativePath).toBe("file1.json");
+      expect(files[1].id).toBe(2);
+      expect(files[1].relativePath).toBe("subdir/file2.json");
+      expect(nextId).toBe(3);
+    });
   });
 
   describe("logFileList", () => {

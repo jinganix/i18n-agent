@@ -1,5 +1,6 @@
 import { Annotation } from "@langchain/langgraph/web";
 import type { FileItem } from "@/utils/file.scanner.js";
+import { replaceReducer } from "@/utils/langgraph.helpers.js";
 import type { NormalizedResult } from "@/utils/normalize.keys.js";
 import { estimateObjectTokens } from "@/utils/token.estimator.js";
 
@@ -36,28 +37,23 @@ export const BuildTasksAnnotation = Annotation.Root({
       sourceLocale: "",
       targetLocales: [],
     }),
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   files: Annotation<FileItem[]>({
     default: () => [],
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   flattenedData: Annotation<Record<string, NormalizedResult>>({
     default: () => ({}),
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   lastCompletedBatchId: Annotation<number>({
     default: () => 0,
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   tasks: Annotation<TaskBatch[]>({
     default: () => [],
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
 });
 

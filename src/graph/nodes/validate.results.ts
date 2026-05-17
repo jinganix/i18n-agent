@@ -1,6 +1,7 @@
 import { Annotation } from "@langchain/langgraph/web";
 import type { TaskBatch } from "./build.tasks.js";
 import { validateTranslationBatch } from "@/utils/json.validator.js";
+import { replaceReducer } from "@/utils/langgraph.helpers.js";
 
 export interface ValidateResultsState {
   tasks: TaskBatch[];
@@ -16,18 +17,15 @@ export interface ValidateResultsState {
 export const ValidateResultsAnnotation = Annotation.Root({
   tasks: Annotation<TaskBatch[]>({
     default: () => [],
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   translatedResults: Annotation<Record<string, Record<string, string>>>({
     default: () => ({}),
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   validationResults: Annotation<ValidateResultsState["validationResults"]>({
     default: () => [],
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
 });
 

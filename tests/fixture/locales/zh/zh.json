@@ -1,6 +1,7 @@
 {
-  "welcome": "Welcome",
-  "goodbye": "Goodbye",
-  "hello": "Hello {name}",
-  "items_count": "{count} items"
+  "welcome": "欢迎",
+  "goodbye": "再见",
+  "hello": "你好 {name}",
+  "items_count": "{count} 个项目",
+  "apples": "她有 {count, plural, =0 {没有苹果} one {# 个苹果} other {# 个苹果}}"
 }

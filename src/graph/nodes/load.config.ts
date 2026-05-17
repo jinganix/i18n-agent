@@ -1,6 +1,7 @@
 import { Annotation } from "@langchain/langgraph/web";
 import { readFileSync } from "fs";
 import { resolve } from "path";
+import { replaceReducer } from "@/utils/langgraph.helpers.js";
 
 export interface ApiConfig {
   baseUrl: string;
@@ -25,13 +26,11 @@ export interface SyncState {
 export const SyncAnnotation = Annotation.Root({
   config: Annotation<SyncConfig | null>({
     default: () => null,
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
   configPath: Annotation<string>({
     default: () => "",
-    // c8 ignore next
-    reducer: (x, y) => y ?? x,
+    reducer: replaceReducer,
   }),
 });
 
