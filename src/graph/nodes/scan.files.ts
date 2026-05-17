@@ -43,9 +43,12 @@ export async function scanFilesNode(
   if (state.sourcePath) {
     targetPath = resolve(state.sourcePath);
 
-    // Validate that sourcePath is within sourceLocale directory
-    if (!targetPath.startsWith(sourceLocaleDir)) {
-      throw new Error(`Source path must be within the source locale directory: ${sourceLocaleDir}`);
+    // Validate that sourcePath is within locales directory
+    if (!targetPath.startsWith(localesDir)) {
+      throw new Error(
+        `Source path must be within the locales directory: ${localesDir}\n` +
+          `Provided path: ${targetPath}`,
+      );
     }
   } else {
     targetPath = sourceLocaleDir;

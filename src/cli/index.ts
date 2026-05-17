@@ -2,13 +2,15 @@
 
 import { Command } from "commander";
 import { version } from "../../package.json" with { type: "json" };
-import { diffCommand } from "./commands/diff";
-import { runCommand } from "./commands/run";
-import { syncCommand } from "./commands/sync";
+import { assistantCommand } from "./commands/assistant.js";
+import { diffCommand } from "./commands/diff.js";
+import { runCommand } from "./commands/run.js";
+import { syncCommand } from "./commands/sync.js";
 
 export function createProgram(): Command {
   const program = new Command();
   program.name("i18n-agent").description("i18n agent CLI tool").version(version);
+  assistantCommand(program);
   diffCommand(program);
   runCommand(program);
   syncCommand(program);
