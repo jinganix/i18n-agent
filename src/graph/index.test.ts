@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { runWorkflow } from "./index";
+import { runWorkflow } from "./index.ts";
 
 describe("graph/index", () => {
   it("should run workflow and output hello world", async () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { detectChanges } from "./detect.changes";
+import { detectChanges } from "./detect.changes.ts";
 
 describe("detect.changes", () => {
   it("should output hello world and return messages", async () => {
