@@ -1,5 +1,6 @@
 import { StateGraph, START, END } from "@langchain/langgraph/web";
 import { detectChanges, StateAnnotation } from "./nodes/detect.changes.js";
+import { flattenKeysNode, FlattenKeysAnnotation } from "./nodes/flatten.keys.js";
 import { loadConfigNode, SyncAnnotation } from "./nodes/load.config.js";
 import { scanFilesNode, ScanFilesAnnotation } from "./nodes/scan.files.js";
 
@@ -26,10 +27,22 @@ export async function syncWorkflow(configPath: string, sourcePath?: string): Pro
     sourcePath,
   };
 
-  await new StateGraph(ScanFilesAnnotation)
+  const scanResult = await new StateGraph(ScanFilesAnnotation)
     .addNode("scanFiles", scanFilesNode)
     .addEdge(START, "scanFiles")
     .addEdge("scanFiles", END)
     .compile()
     .invoke(scanState);
+
+  const flattenState = {
+    files: (scanResult as typeof ScanFilesAnnotation.State).files,
+    flattenedData: {},
+  };
+
+  await new StateGraph(FlattenKeysAnnotation)
+    .addNode("flattenKeys", flattenKeysNode)
+    .addEdge(START, "flattenKeys")
+    .addEdge("flattenKeys", END)
+    .compile()
+    .invoke(flattenState);
 }
