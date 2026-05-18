@@ -66,7 +66,12 @@ export function extractKeysFromJson(content: string): Set<string> {
   }
 }
 
-export function compareKeys(oldKeys: Set<string>, newKeys: Set<string>): KeyChanges {
+export function compareKeys(
+  oldKeys: Set<string>,
+  newKeys: Set<string>,
+  oldContent?: Record<string, unknown>,
+  newContent?: Record<string, unknown>,
+): KeyChanges {
   const added: string[] = [];
   const deleted: string[] = [];
   const modified: string[] = [];
@@ -74,6 +79,12 @@ export function compareKeys(oldKeys: Set<string>, newKeys: Set<string>): KeyChan
   for (const key of newKeys) {
     if (!oldKeys.has(key)) {
       added.push(key);
+    } else if (oldContent && newContent) {
+      const oldValue = oldContent[key];
+      const newValue = newContent[key];
+      if (JSON.stringify(oldValue) !== JSON.stringify(newValue)) {
+        modified.push(key);
+      }
     }
   }
 
@@ -99,6 +110,14 @@ export function detectGitChanges(filePath: string): FileKeyDiff | null {
   const currentKeys = extractKeysFromJson(currentContent);
 
   let previousKeys: Set<string>;
+  let previousContentObj: Record<string, unknown> | undefined;
+  let currentContentObj: Record<string, unknown> | undefined;
+
+  try {
+    currentContentObj = JSON.parse(currentContent);
+  } catch {
+    // ignore
+  }
 
   if (hasGitChanges(filePath)) {
     const previousContent = getGitPreviousVersion(filePath);
@@ -106,6 +125,11 @@ export function detectGitChanges(filePath: string): FileKeyDiff | null {
       previousKeys = new Set();
     } else {
       previousKeys = extractKeysFromJson(previousContent);
+      try {
+        previousContentObj = JSON.parse(previousContent);
+      } catch {
+        // ignore
+      }
     }
   } else {
     const previousContent = getGitPreviousVersion(filePath);
@@ -116,9 +140,14 @@ export function detectGitChanges(filePath: string): FileKeyDiff | null {
       };
     }
     previousKeys = extractKeysFromJson(previousContent);
+    try {
+      previousContentObj = JSON.parse(previousContent);
+    } catch {
+      // ignore
+    }
   }
 
-  const changes = compareKeys(previousKeys, currentKeys);
+  const changes = compareKeys(previousKeys, currentKeys, previousContentObj, currentContentObj);
 
   return {
     changes,

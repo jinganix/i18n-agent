@@ -7,8 +7,11 @@
   },
   "scripts": {
     "check": "npm run lint && npm run coverage",
-    "test": "vitest run",
-    "coverage": "vitest run --coverage",
+    "test": "vitest run --exclude 'tests/e2e.*'",
+    "test:all": "vitest run",
+    "test:e2e": "vitest run tests/e2e.*",
+    "coverage": "vitest run --coverage --exclude 'tests/e2e.*'",
+    "coverage:all": "vitest run --coverage",
     "lint": "eslint ./src ./tests",
     "lint:fix": "eslint ./src ./tests --fix",
     "build": "vite build && cp -r src/prompts dist/prompts && chmod +x dist/cli/index.js",
