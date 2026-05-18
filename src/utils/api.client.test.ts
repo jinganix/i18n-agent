@@ -7,11 +7,11 @@ describe("api.client", () => {
   it("should load prompt with replacements", () => {
     const template = "Translate from {sourceLocale} to {targetLocale}";
     const result = loadPrompt(template, {
-      sourceLocale: "en",
-      targetLocale: "ja",
+      sourceLocale: "en-US",
+      targetLocale: "ja-JP",
     });
 
-    expect(result).toBe("Translate from en to ja");
+    expect(result).toBe("Translate from en-US to ja-JP");
   });
 
   it("should handle multiple replacements", () => {
@@ -83,7 +83,6 @@ describe("api.client", () => {
 
   it("should handle API timeout", async () => {
     const mockFetch = vi.mocked(fetch);
-    // Simulate timeout by creating an AbortError
     const abortError = new DOMException("The operation was aborted", "AbortError");
     mockFetch.mockRejectedValueOnce(abortError);
 
@@ -124,7 +123,6 @@ describe("api.client", () => {
 
   it("should handle timeout with default timeout value", async () => {
     const mockFetch = vi.mocked(fetch);
-    // Simulate timeout by creating an AbortError without specifying timeout
     const abortError = new DOMException("The operation was aborted", "AbortError");
     mockFetch.mockRejectedValueOnce(abortError);
 

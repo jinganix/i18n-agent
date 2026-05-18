@@ -6,6 +6,7 @@ export interface SyncOptions {
   source?: string;
   dryRun?: boolean;
   mode?: "full" | "diff";
+  targetLocales?: string[];
 }
 
 export async function executeSync(options: SyncOptions): Promise<void> {
@@ -16,7 +17,13 @@ export async function executeSync(options: SyncOptions): Promise<void> {
   }
 
   try {
-    await syncWorkflow(options.config, options.source, options.dryRun, options.mode);
+    await syncWorkflow(
+      options.config,
+      options.source,
+      options.dryRun,
+      options.mode,
+      options.targetLocales,
+    );
   } catch (error) {
     console.error(`Error: ${(error as Error).message}`);
     process.exit(1);

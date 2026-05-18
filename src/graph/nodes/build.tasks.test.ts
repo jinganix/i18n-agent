@@ -18,7 +18,7 @@ describe("build.tasks", () => {
     const state = {
       config: {
         localesDir: "./tests/fixture/locales",
-        sourceLocale: "en",
+        sourceLocale: "en-US",
         targetLocales: ["ja", "zh"],
         tokenSize: 100,
       },
@@ -47,7 +47,7 @@ describe("build.tasks", () => {
     const state = {
       config: {
         localesDir: "./tests/fixture/locales",
-        sourceLocale: "en",
+        sourceLocale: "en-US",
         targetLocales: ["ja", "zh"],
         tokenSize: 1000,
       },
@@ -81,8 +81,8 @@ describe("build.tasks", () => {
     const state = {
       config: {
         localesDir: "./tests/fixture/locales",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
         tokenSize: 1000,
       },
       files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
@@ -104,8 +104,8 @@ describe("build.tasks", () => {
     const state = {
       config: {
         localesDir: "./tests/fixture/locales",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
         tokenSize: 10,
       },
       files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
@@ -129,8 +129,8 @@ describe("build.tasks", () => {
     const state = {
       config: {
         localesDir: "./tests/fixture/locales",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
       },
       files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
       flattenedData: {
@@ -152,8 +152,8 @@ describe("build.tasks", () => {
     const state = {
       config: {
         localesDir: "./tests/fixture/locales",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
         tokenSize: 1000,
       },
       files: [] as FileItem[],
@@ -171,11 +171,11 @@ describe("build.tasks", () => {
   it("should only include new keys in diff mode", async () => {
     const consoleSpy = vi.spyOn(console, "log");
     const testDir = "/tmp/test-diff-mode";
-    const targetDir = join(testDir, "ja");
+    const targetDir = join(testDir, "ja-JP");
 
     mkdirSync(targetDir, { recursive: true });
     writeFileSync(
-      join(targetDir, "ja.json"),
+      join(targetDir, "ja-JP.json"),
       JSON.stringify({
         key1: "existing",
       }),
@@ -186,13 +186,15 @@ describe("build.tasks", () => {
       config: {
         localesDir: testDir,
         mode: "diff",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
         tokenSize: 1000,
       },
-      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
+      files: [
+        { absolutePath: "/test/en-US.json", id: 1, relativePath: "en-US.json" },
+      ] as FileItem[],
       flattenedData: {
-        "en.json": {
+        "en-US.json": {
           "1.key1": "value1",
           "1.key2": "value2",
         },
@@ -222,8 +224,8 @@ describe("build.tasks", () => {
       config: {
         localesDir: testDir,
         mode: "diff",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
         tokenSize: 1000,
       },
       files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
@@ -249,7 +251,7 @@ describe("build.tasks", () => {
   it("should handle nested keys in diff mode", async () => {
     const consoleSpy = vi.spyOn(console, "log");
     const testDir = "/tmp/test-diff-nested";
-    const targetDir = join(testDir, "ja");
+    const targetDir = join(testDir, "ja-JP");
 
     mkdirSync(targetDir, { recursive: true });
     writeFileSync(
@@ -266,8 +268,8 @@ describe("build.tasks", () => {
       config: {
         localesDir: testDir,
         mode: "diff",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
         tokenSize: 1000,
       },
       files: [
@@ -299,22 +301,24 @@ describe("build.tasks", () => {
   it("should handle invalid JSON in target file in diff mode", async () => {
     const consoleSpy = vi.spyOn(console, "log");
     const testDir = "/tmp/test-diff-invalid";
-    const targetDir = join(testDir, "ja");
+    const targetDir = join(testDir, "ja-JP");
 
     mkdirSync(targetDir, { recursive: true });
-    writeFileSync(join(targetDir, "ja.json"), "invalid json", "utf-8");
+    writeFileSync(join(targetDir, "ja-JP.json"), "invalid json", "utf-8");
 
     const state = {
       config: {
         localesDir: testDir,
         mode: "diff",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
         tokenSize: 1000,
       },
-      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
+      files: [
+        { absolutePath: "/test/en-US.json", id: 1, relativePath: "en-US.json" },
+      ] as FileItem[],
       flattenedData: {
-        "en.json": {
+        "en-US.json": {
           "1.key1": "value1",
         },
       },
@@ -334,7 +338,7 @@ describe("build.tasks", () => {
   it("should handle files without extensions in diff mode", async () => {
     const consoleSpy = vi.spyOn(console, "log");
     const testDir = "/tmp/test-no-ext";
-    const targetDir = join(testDir, "ja");
+    const targetDir = join(testDir, "ja-JP");
 
     mkdirSync(targetDir, { recursive: true });
     writeFileSync(join(targetDir, "messages"), JSON.stringify({}), "utf-8");
@@ -343,8 +347,8 @@ describe("build.tasks", () => {
       config: {
         localesDir: testDir,
         mode: "diff",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
         tokenSize: 1000,
       },
       files: [{ absolutePath: "/test/messages", id: 1, relativePath: "messages" }] as FileItem[],

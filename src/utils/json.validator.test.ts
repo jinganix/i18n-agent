@@ -100,7 +100,6 @@ describe("json.validator", () => {
 
   it("should handle invalid JSON with circular reference", () => {
     const inputKeys = ["key1"];
-    // BigInt cannot be serialized by JSON.stringify
     const outputData: Record<string, unknown> = {
       invalid: BigInt(123),
       key1: "value1",

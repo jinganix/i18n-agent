@@ -72,7 +72,6 @@ export async function translateNode(
         model: state.apiConfig.model || "gpt-4o-mini",
       });
 
-      // Clean the response to handle extra characters from AI
       const cleanedResponse = cleanJson(response);
       translatedResults[`batch_${task.batchId}`] = JSON.parse(cleanedResponse);
     }

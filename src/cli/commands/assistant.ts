@@ -1,9 +1,11 @@
 import { Command } from "commander";
 import { readFileSync } from "fs";
-import { resolve } from "path";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 import { executeToolCall } from "../utils/tool.executor.js";
 import type { ApiConfig } from "@/graph/nodes/load.config.js";
 import { callTranslationApi } from "@/utils/api.client.js";
+import { validateAndNormalizeLocales } from "@/utils/locale.helpers.js";
 
 export interface AssistantOptions {
   config?: string;
@@ -35,10 +37,23 @@ export const AVAILABLE_TOOLS: Tool[] = [
           description: "Preview changes without calling AI translation API (true/false)",
           type: "boolean",
         },
+        mode: {
+          description:
+            "Sync mode: full or diff (default: diff). Full replaces all keys, diff preserves existing keys and only translates new ones",
+          type: "string",
+        },
         source: {
           description:
             "Source file or directory path relative to source locale (optional, syncs all if not specified)",
           type: "string",
+        },
+        targetLocales: {
+          description:
+            "Array of target locale codes to translate to (e.g., ['zh', 'ru']). If provided, overrides the targetLocales in config file",
+          items: {
+            type: "string",
+          },
+          type: "array",
         },
       },
       required: ["config"],
@@ -47,48 +62,28 @@ export const AVAILABLE_TOOLS: Tool[] = [
   },
 ];
 
-const SYSTEM_PROMPT = `You are an i18n (internationalization) assistant that helps users manage translation tasks.
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const promptTemplatePath = resolve(__dirname, "../../prompts/assistant.md");
 
-Available tools you can use:
-${AVAILABLE_TOOLS.map((tool) => `- ${tool.name}: ${tool.description}`).join("\n")}
-
-When a user asks you to do something:
-1. Understand their intent
-2. Choose the most appropriate tool
-3. Extract the required parameters from their message
-4. If the user specified a config file via command line, you don't need to include it in parameters
-5. Respond with a JSON object containing:
-   - "tool": the tool name to use
-   - "parameters": the parameters for that tool (config is optional if provided via CLI)
-   - "explanation": brief explanation of what you're doing
-
-If you cannot determine which tool to use or missing critical information, respond with:
-{
-  "tool": null,
-  "parameters": {},
-  "explanation": "Explanation of what information is missing or why you cannot help"
+function loadPromptTemplate(): string {
+  try {
+    return readFileSync(promptTemplatePath, "utf-8");
+  } catch {
+    // c8 ignore next
+    throw new Error(`Failed to load prompt template from ${promptTemplatePath}`);
+  }
 }
 
-Examples:
-User: "Help me translate foo.json to Japanese"
-Response: {
-  "tool": "sync",
-  "parameters": {
-    "source": "foo.json"
-  },
-  "explanation": "I'll sync the foo.json file to translate it to Japanese based on your configuration"
+function buildSystemPrompt(): string {
+  const template = loadPromptTemplate();
+  const toolsDescription = AVAILABLE_TOOLS.map(
+    (tool) => `- ${tool.name}: ${tool.description}`,
+  ).join("\n");
+  return template.replace("{{tools}}", toolsDescription);
 }
 
-User: "Sync all translation files with dry run"
-Response: {
-  "tool": "sync",
-  "parameters": {
-    "dryRun": true
-  },
-  "explanation": "I'll preview what would change when syncing all files without making actual changes"
-}
-
-Always respond with valid JSON only, no additional text.`;
+const SYSTEM_PROMPT = buildSystemPrompt();
 
 export async function executeAssistant(userMessage: string, configPath?: string): Promise<void> {
   try {
@@ -139,6 +134,20 @@ export async function executeAssistant(userMessage: string, configPath?: string)
     if (!decision.tool) {
       console.log("❌ Cannot proceed: Missing information or unclear request");
       process.exit(1);
+    }
+
+    if (decision.tool === "sync" && decision.parameters.targetLocales) {
+      try {
+        const validatedLocales = validateAndNormalizeLocales(
+          decision.parameters.targetLocales as string[],
+        );
+        decision.parameters.targetLocales = validatedLocales;
+        console.log(`🌍 Validated target locales: ${validatedLocales.join(", ")}`);
+      } catch (error) {
+        console.error(`❌ Invalid locale format: ${(error as Error).message}`);
+        console.log("\n💡 Please use BCP 47 format (e.g., zh-CN, en-US, ja-JP)");
+        process.exit(1);
+      }
     }
 
     console.log(`🔧 Using tool: ${decision.tool}`);

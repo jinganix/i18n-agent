@@ -21,7 +21,7 @@ describe("translate", () => {
           { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" },
           { fileId: 1, filePath: "en.json", prefixedKey: "1.key2", value: "value2" },
         ],
-        locale: "ja",
+        locale: "ja-JP",
         tokenCount: 50,
       },
     ];
@@ -42,7 +42,7 @@ describe("translate", () => {
     expect(result.translatedResults).toBeDefined();
     expect(result.translatedResults!["batch_1"]).toBeDefined();
     expect(result.translatedResults!["batch_1"]["1.key1"]).toBe("translated1");
-    expect(consoleSpy).toHaveBeenCalledWith("Translating batch 1 to ja...");
+    expect(consoleSpy).toHaveBeenCalledWith("Translating batch 1 to ja-JP...");
 
     consoleSpy.mockRestore();
   });
@@ -55,7 +55,7 @@ describe("translate", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
-        locale: "ja",
+        locale: "ja-JP",
         tokenCount: 25,
       },
     ];
@@ -84,7 +84,7 @@ describe("translate", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
-        locale: "ja",
+        locale: "ja-JP",
         tokenCount: 25,
       },
     ];
@@ -112,13 +112,13 @@ describe("translate", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
-        locale: "ja",
+        locale: "ja-JP",
         tokenCount: 25,
       },
       {
         batchId: 2,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
-        locale: "zh",
+        locale: "zh-CN",
         tokenCount: 25,
       },
     ];
@@ -153,7 +153,7 @@ describe("translate", () => {
           { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" },
           { fileId: 1, filePath: "en.json", prefixedKey: "1.key2", value: "value2" },
         ],
-        locale: "ja",
+        locale: "ja-JP",
         tokenCount: 50,
       },
     ];
@@ -169,7 +169,9 @@ describe("translate", () => {
     expect(result.translatedResults).toBeDefined();
     expect(result.translatedResults!["batch_1"]).toBeDefined();
     expect(result.translatedResults!["batch_1"]["1.key1"]).toBe("value1");
-    expect(consoleSpy).toHaveBeenCalledWith("[Dry Run] Skipping translation for batch 1 to ja...");
+    expect(consoleSpy).toHaveBeenCalledWith(
+      "[Dry Run] Skipping translation for batch 1 to ja-JP...",
+    );
 
     consoleSpy.mockRestore();
   });
@@ -179,7 +181,7 @@ describe("translate", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
-        locale: "ja",
+        locale: "ja-JP",
         tokenCount: 25,
       },
     ];

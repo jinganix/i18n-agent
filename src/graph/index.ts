@@ -22,6 +22,7 @@ export async function syncWorkflow(
   sourcePath?: string,
   dryRun?: boolean,
   mode?: "full" | "diff",
+  targetLocales?: string[],
 ): Promise<void> {
   const configResult = await new StateGraph(SyncAnnotation)
     .addNode("loadConfig", loadConfigNode)
@@ -33,6 +34,9 @@ export async function syncWorkflow(
   const config = (configResult as typeof SyncAnnotation.State).config;
   if (mode) {
     config!.mode = mode;
+  }
+  if (targetLocales && targetLocales.length > 0) {
+    config!.targetLocales = targetLocales;
   }
 
   const scanState = {

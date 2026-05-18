@@ -62,7 +62,7 @@ vi.mock("@/graph/nodes/translate.js", async (importOriginal) => {
                   break;
                 }
               } catch {
-                // Continue to next file
+                // ignore
               }
             }
           }
@@ -103,8 +103,8 @@ describe("sync workflow integration test - diff mode", () => {
     };
 
     const testLocalesDir = join(outputDir, "test-locales");
-    const testEnDir = join(testLocalesDir, "en");
-    const testZhDir = join(testLocalesDir, "zh");
+    const testEnDir = join(testLocalesDir, "en-US");
+    const testZhDir = join(testLocalesDir, "zh-CN");
 
     mkdirSync(testEnDir, { recursive: true });
     mkdirSync(testZhDir, { recursive: true });
@@ -121,13 +121,13 @@ describe("sync workflow integration test - diff mode", () => {
       key4: "值4",
     };
 
-    writeFileSync(join(testEnDir, "en.json"), JSON.stringify(enContent, null, 2));
-    writeFileSync(join(testZhDir, "zh.json"), JSON.stringify(zhContent, null, 2));
+    writeFileSync(join(testEnDir, "en-US.json"), JSON.stringify(enContent, null, 2));
+    writeFileSync(join(testZhDir, "zh-CN.json"), JSON.stringify(zhContent, null, 2));
     writeFileSync(modifiedConfigPath, JSON.stringify(modifiedConfig, null, 2));
 
     await syncWorkflow(modifiedConfigPath);
 
-    const actualZhPath = join(testLocalesDir, "zh", "zh.json");
+    const actualZhPath = join(testLocalesDir, "zh-CN", "zh-CN.json");
     const actualZhContent = JSON.parse(readFileSync(actualZhPath, "utf-8"));
 
     expect(Object.keys(actualZhContent)).toHaveLength(4);
@@ -147,8 +147,8 @@ describe("sync workflow integration test - diff mode", () => {
     };
 
     const testLocalesDir = join(outputDir, "test-locales");
-    const testEnDir = join(testLocalesDir, "en");
-    const testZhDir = join(testLocalesDir, "zh");
+    const testEnDir = join(testLocalesDir, "en-US");
+    const testZhDir = join(testLocalesDir, "zh-CN");
 
     mkdirSync(testEnDir, { recursive: true });
     mkdirSync(testZhDir, { recursive: true });
@@ -164,13 +164,13 @@ describe("sync workflow integration test - diff mode", () => {
       key1: "值1",
     };
 
-    writeFileSync(join(testEnDir, "en.json"), JSON.stringify(enContent, null, 2));
-    writeFileSync(join(testZhDir, "zh.json"), JSON.stringify(zhContent, null, 2));
+    writeFileSync(join(testEnDir, "en-US.json"), JSON.stringify(enContent, null, 2));
+    writeFileSync(join(testZhDir, "zh-CN.json"), JSON.stringify(zhContent, null, 2));
     writeFileSync(modifiedConfigPath, JSON.stringify(modifiedConfig, null, 2));
 
     await syncWorkflow(modifiedConfigPath);
 
-    const actualZhPath = join(testLocalesDir, "zh", "zh.json");
+    const actualZhPath = join(testLocalesDir, "zh-CN", "zh-CN.json");
     const actualZhContent = JSON.parse(readFileSync(actualZhPath, "utf-8"));
 
     expect(Object.keys(actualZhContent)).toHaveLength(4);
@@ -190,8 +190,8 @@ describe("sync workflow integration test - diff mode", () => {
     };
 
     const testLocalesDir = join(outputDir, "test-locales");
-    const testEnDir = join(testLocalesDir, "en");
-    const testZhDir = join(testLocalesDir, "zh");
+    const testEnDir = join(testLocalesDir, "en-US");
+    const testZhDir = join(testLocalesDir, "zh-CN");
 
     mkdirSync(testEnDir, { recursive: true });
     mkdirSync(testZhDir, { recursive: true });
@@ -208,13 +208,13 @@ describe("sync workflow integration test - diff mode", () => {
       key5: "值5",
     };
 
-    writeFileSync(join(testEnDir, "en.json"), JSON.stringify(enContent, null, 2));
-    writeFileSync(join(testZhDir, "zh.json"), JSON.stringify(zhContent, null, 2));
+    writeFileSync(join(testEnDir, "en-US.json"), JSON.stringify(enContent, null, 2));
+    writeFileSync(join(testZhDir, "zh-CN.json"), JSON.stringify(zhContent, null, 2));
     writeFileSync(modifiedConfigPath, JSON.stringify(modifiedConfig, null, 2));
 
     await syncWorkflow(modifiedConfigPath);
 
-    const actualZhPath = join(testLocalesDir, "zh", "zh.json");
+    const actualZhPath = join(testLocalesDir, "zh-CN", "zh-CN.json");
     const actualZhContent = JSON.parse(readFileSync(actualZhPath, "utf-8"));
 
     expect(Object.keys(actualZhContent)).toHaveLength(5);
@@ -235,8 +235,8 @@ describe("sync workflow integration test - diff mode", () => {
     };
 
     const testLocalesDir = join(outputDir, "test-locales");
-    const testEnDir = join(testLocalesDir, "en");
-    const testZhDir = join(testLocalesDir, "zh");
+    const testEnDir = join(testLocalesDir, "en-US");
+    const testZhDir = join(testLocalesDir, "zh-CN");
 
     mkdirSync(testEnDir, { recursive: true });
     mkdirSync(testZhDir, { recursive: true });
@@ -262,7 +262,7 @@ describe("sync workflow integration test - diff mode", () => {
 
     await syncWorkflow(modifiedConfigPath);
 
-    const actualZhPath = join(testLocalesDir, "zh", "nested.json");
+    const actualZhPath = join(testLocalesDir, "zh-CN", "nested.json");
     const actualZhContent = JSON.parse(readFileSync(actualZhPath, "utf-8"));
 
     expect(actualZhContent.user).toBeDefined();
