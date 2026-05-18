@@ -145,7 +145,7 @@ export async function executeAssistant(userMessage: string, configPath?: string)
         console.log(`🌍 Validated target locales: ${validatedLocales.join(", ")}`);
       } catch (error) {
         console.error(`❌ Invalid locale format: ${(error as Error).message}`);
-        console.log("\n💡 Please use BCP 47 format (e.g., zh-CN, en-US, ja-JP)");
+        console.log("\n💡 Please use BCP 47 format (e.g., zh-CN, en-US, zh-TW)");
         process.exit(1);
       }
     }
@@ -183,7 +183,7 @@ export function assistantCommand(program: Command): void {
       if (!userMessage) {
         console.error("Error: Please provide a message");
         console.log("\nUsage examples:");
-        console.log('  i18n-agent ask "Translate foo.json to Japanese"');
+        console.log('  i18n-agent ask "Translate foo.json to Simplified Chinese"');
         console.log('  i18n-agent ask -c ./config.json -m "Sync all files in locales directory"');
         process.exit(1);
       }

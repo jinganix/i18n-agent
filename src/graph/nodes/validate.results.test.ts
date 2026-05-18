@@ -13,7 +13,7 @@ describe("validate.results", () => {
           { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" },
           { fileId: 1, filePath: "en.json", prefixedKey: "1.key2", value: "value2" },
         ],
-        locale: "ja-JP",
+        locale: "zh-CN",
         tokenCount: 50,
       },
     ];
@@ -49,7 +49,7 @@ describe("validate.results", () => {
           { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" },
           { fileId: 1, filePath: "en.json", prefixedKey: "1.key2", value: "value2" },
         ],
-        locale: "ja-JP",
+        locale: "zh-CN",
         tokenCount: 50,
       },
     ];
@@ -78,7 +78,7 @@ describe("validate.results", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "value1" }],
-        locale: "ja-JP",
+        locale: "zh-CN",
         tokenCount: 50,
       },
     ];

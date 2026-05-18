@@ -28,8 +28,8 @@ describe("locale.helpers", () => {
       expect(normalizeLocale("RU-RU")).toBe("ru-RU");
     });
 
-    it("should normalize ja-jp to ja-JP", () => {
-      expect(normalizeLocale("ja-jp")).toBe("ja-JP");
+    it("should normalize zh-cn to zh-CN", () => {
+      expect(normalizeLocale("zh-cn")).toBe("zh-CN");
     });
 
     it("should handle single part locale codes", () => {
@@ -79,7 +79,7 @@ describe("locale.helpers", () => {
     it("should validate valid BCP 47 locale codes", () => {
       expect(isValidBCP47Locale("zh-CN")).toBe(true);
       expect(isValidBCP47Locale("en-US")).toBe(true);
-      expect(isValidBCP47Locale("ja-JP")).toBe(true);
+      expect(isValidBCP47Locale("zh-CN")).toBe(true);
       expect(isValidBCP47Locale("ru-RU")).toBe(true);
       expect(isValidBCP47Locale("fr-FR")).toBe(true);
     });
@@ -109,8 +109,8 @@ describe("locale.helpers", () => {
 
   describe("validateAndNormalizeLocales", () => {
     it("should validate and normalize valid locale array", () => {
-      const result = validateAndNormalizeLocales(["zh-CN", "en-US", "ja-JP"]);
-      expect(result).toEqual(["zh-CN", "en-US", "ja-JP"]);
+      const result = validateAndNormalizeLocales(["zh-CN", "en-US", "zh-TW"]);
+      expect(result).toEqual(["zh-CN", "en-US", "zh-TW"]);
     });
 
     it("should normalize lowercase locale codes", () => {
@@ -124,8 +124,8 @@ describe("locale.helpers", () => {
     });
 
     it("should handle mixed case locale codes", () => {
-      const result = validateAndNormalizeLocales(["zh-cn", "EN-us", "Ja-jp"]);
-      expect(result).toEqual(["zh-CN", "en-US", "ja-JP"]);
+      const result = validateAndNormalizeLocales(["zh-cn", "EN-us", "Zh-tw"]);
+      expect(result).toEqual(["zh-CN", "en-US", "zh-TW"]);
     });
 
     it("should throw error for non-array input", () => {

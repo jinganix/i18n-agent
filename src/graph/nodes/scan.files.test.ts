@@ -18,7 +18,7 @@ describe("scan.files", () => {
     },
     localesDir: "./tests/fixture/locales",
     sourceLocale: "en-US",
-    targetLocales: ["ja-JP", "zh-CN"],
+    targetLocales: ["zh-CN", "zh-TW"],
     tokenSize: 3000,
   };
 
@@ -59,7 +59,7 @@ describe("scan.files", () => {
     const mockDirents = [
       { isDirectory: () => true, name: "en-US" },
       { isDirectory: () => true, name: "zh-CN" },
-      { isDirectory: () => true, name: "ja-JP" },
+      { isDirectory: () => true, name: "zh-TW" },
     ] as unknown as ReturnType<typeof readdirSync>;
 
     const mockFileStrings = ["en-US.json", "nested.json"] as unknown as ReturnType<
