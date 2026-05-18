@@ -397,8 +397,8 @@ describe("commands/assistant", () => {
 
     vi.mocked(callTranslationApi).mockResolvedValue(
       JSON.stringify({
-        explanation: "Translating to Japanese",
-        parameters: { source: "test.json", targetLocales: ["ja-jp"] },
+        explanation: "Translating to Simplified Chinese",
+        parameters: { source: "test.json", targetLocales: ["zh-cn"] },
         tool: "sync",
       }),
     );
@@ -413,7 +413,7 @@ describe("commands/assistant", () => {
     expect(executeToolCall).toHaveBeenCalledWith(
       "sync",
       expect.objectContaining({
-        targetLocales: ["ja-JP"],
+        targetLocales: ["zh-CN"],
       }),
       expect.any(String),
     );

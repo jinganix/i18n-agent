@@ -30,7 +30,7 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.user.name", value: "ユーザー名" }],
-        locale: "ja-JP",
+        locale: "zh-CN",
         tokenCount: 25,
       },
     ];
@@ -40,7 +40,7 @@ describe("sync.files", () => {
         localesDir: tempDir,
         mode: "full",
         sourceLocale: "en-US",
-        targetLocales: ["ja-JP"],
+        targetLocales: ["zh-CN"],
       },
       syncedFiles: [],
       tasks,
@@ -55,7 +55,7 @@ describe("sync.files", () => {
 
     expect(result.syncedFiles).toBeDefined();
     expect(result.syncedFiles!.length).toBe(1);
-    expect(result.syncedFiles![0].locale).toBe("ja-JP");
+    expect(result.syncedFiles![0].locale).toBe("zh-CN");
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Synced"));
 
     consoleSpy.mockRestore();
@@ -68,13 +68,13 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "値1" }],
-        locale: "ja-JP",
+        locale: "zh-CN",
         tokenCount: 20,
       },
       {
         batchId: 2,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "値1" }],
-        locale: "zh-CN",
+        locale: "zh-TW",
         tokenCount: 20,
       },
     ];
@@ -84,7 +84,7 @@ describe("sync.files", () => {
         localesDir: tempDir,
         mode: "full",
         sourceLocale: "en-US",
-        targetLocales: ["ja-JP", "zh-CN"],
+        targetLocales: ["zh-CN", "zh-TW"],
       },
       syncedFiles: [],
       tasks,
@@ -112,7 +112,7 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en-US.json", prefixedKey: "1.key1", value: "値1" }],
-        locale: "ja-JP",
+        locale: "zh-CN",
         tokenCount: 20,
       },
     ];
@@ -122,7 +122,7 @@ describe("sync.files", () => {
         localesDir: tempDir,
         mode: "full",
         sourceLocale: "en-US",
-        targetLocales: ["ja-JP"],
+        targetLocales: ["zh-CN"],
       },
       syncedFiles: [],
       tasks,
@@ -135,7 +135,7 @@ describe("sync.files", () => {
 
     const result = await syncFilesNode(state as typeof SyncFilesAnnotation.State);
 
-    expect(result.syncedFiles![0].filePath).toContain("ja-JP.json");
+    expect(result.syncedFiles![0].filePath).toContain("zh-CN.json");
 
     consoleSpy.mockRestore();
   });
@@ -147,7 +147,7 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "nested.json", prefixedKey: "1.key1", value: "値1" }],
-        locale: "ja-JP",
+        locale: "zh-CN",
         tokenCount: 20,
       },
     ];
@@ -156,7 +156,7 @@ describe("sync.files", () => {
       config: {
         localesDir: tempDir,
         sourceLocale: "en-US",
-        targetLocales: ["ja-JP"],
+        targetLocales: ["zh-CN"],
       },
       syncedFiles: [],
       tasks,

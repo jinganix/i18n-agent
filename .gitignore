@@ -13,8 +13,6 @@ dist
 dist-ssr
 *.local
 
-.tmp/
-
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -26,3 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 *.iml
+
+.tmp/
+i18n-agent.config.json

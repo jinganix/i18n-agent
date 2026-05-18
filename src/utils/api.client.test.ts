@@ -8,10 +8,10 @@ describe("api.client", () => {
     const template = "Translate from {sourceLocale} to {targetLocale}";
     const result = loadPrompt(template, {
       sourceLocale: "en-US",
-      targetLocale: "ja-JP",
+      targetLocale: "zh-CN",
     });
 
-    expect(result).toBe("Translate from en-US to ja-JP");
+    expect(result).toBe("Translate from en-US to zh-CN");
   });
 
   it("should handle multiple replacements", () => {
@@ -26,8 +26,8 @@ describe("api.client", () => {
   });
 
   it("should get prompt for specific locale", () => {
-    const jaPrompt = getPromptForLocale("ja");
-    expect(jaPrompt).toContain("Japanese");
+    const zhPrompt = getPromptForLocale("zh");
+    expect(zhPrompt).toContain("Chinese");
   });
 
   it("should fallback to default prompt for unknown locale", () => {

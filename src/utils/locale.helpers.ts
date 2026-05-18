@@ -27,7 +27,7 @@ export function validateAndNormalizeLocales(locales: string[]): string[] {
 
     if (!isValidBCP47Locale(locale)) {
       throw new Error(
-        `Invalid locale format: "${locale}". Must follow BCP 47 standard (e.g., zh-CN, en-US, ja-JP).`,
+        `Invalid locale format: "${locale}". Must follow BCP 47 standard (e.g., zh-CN, en-US, zh-TW).`,
       );
     }
 
