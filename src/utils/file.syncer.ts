@@ -1,4 +1,4 @@
-import { writeFileSync, mkdirSync } from "fs";
+import { writeFileSync, mkdirSync, readFileSync, existsSync } from "fs";
 import { dirname } from "path";
 
 export interface SyncFileResult {
@@ -44,4 +44,51 @@ export function syncTranslationToFile(
     filePath: targetPath,
     keyCount: Object.keys(translatedData).length,
   };
+}
+
+export function mergeWithExistingData(
+  targetPath: string,
+  newData: Record<string, string | number | boolean | null>,
+): Record<string, string | number | boolean | null> {
+  if (!existsSync(targetPath)) {
+    return newData;
+  }
+
+  try {
+    const content = readFileSync(targetPath, "utf-8");
+    const existingData = JSON.parse(content);
+
+    const flatExistingData = flattenObject(existingData);
+
+    const mergedData: Record<string, string | number | boolean | null> = {};
+
+    for (const [key, value] of Object.entries(flatExistingData)) {
+      if (!(key in newData)) {
+        mergedData[key] = String(value);
+      }
+    }
+
+    Object.assign(mergedData, newData);
+
+    return mergedData;
+  } catch {
+    return newData;
+  }
+}
+
+function flattenObject(obj: Record<string, unknown>, prefix = ""): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    const fullKey = prefix ? `${prefix}.${key}` : key;
+
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      const nested = flattenObject(value as Record<string, unknown>, fullKey);
+      Object.assign(result, nested);
+    } else {
+      result[fullKey] = value;
+    }
+  }
+
+  return result;
 }

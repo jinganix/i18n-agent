@@ -3,6 +3,8 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { replaceReducer } from "@/utils/langgraph.helpers.js";
 
+export type SyncMode = "full" | "diff";
+
 export interface ApiConfig {
   baseUrl: string;
   apiKey: string;
@@ -16,6 +18,7 @@ export interface SyncConfig {
   localesDir: string;
   tokenSize?: number;
   api?: ApiConfig;
+  mode?: SyncMode;
 }
 
 export interface SyncState {

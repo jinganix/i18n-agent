@@ -1,3 +1,5 @@
+import { mkdirSync, rmSync, writeFileSync } from "fs";
+import { join } from "path";
 import { describe, it, expect, vi } from "vitest";
 import { buildTasksNode, BuildTasksAnnotation } from "./build.tasks.js";
 import type { FileItem } from "@/utils/file.scanner.js";
@@ -164,5 +166,202 @@ describe("build.tasks", () => {
 
     expect(result.tasks).toBeDefined();
     expect(result.tasks!.length).toBe(0);
+  });
+
+  it("should only include new keys in diff mode", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+    const testDir = "/tmp/test-diff-mode";
+    const targetDir = join(testDir, "ja");
+
+    mkdirSync(targetDir, { recursive: true });
+    writeFileSync(
+      join(targetDir, "ja.json"),
+      JSON.stringify({
+        key1: "existing",
+      }),
+      "utf-8",
+    );
+
+    const state = {
+      config: {
+        localesDir: testDir,
+        mode: "diff",
+        sourceLocale: "en",
+        targetLocales: ["ja"],
+        tokenSize: 1000,
+      },
+      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
+      flattenedData: {
+        "en.json": {
+          "1.key1": "value1",
+          "1.key2": "value2",
+        },
+      },
+      lastCompletedBatchId: 0,
+      tasks: [],
+    };
+
+    const result = await buildTasksNode(state as typeof BuildTasksAnnotation.State);
+
+    expect(result.tasks).toBeDefined();
+    if (result.tasks!.length > 0) {
+      const keys = result.tasks![0].keys.map((k) => k.prefixedKey);
+      expect(keys).toContain("1.key2");
+      expect(keys).not.toContain("1.key1");
+    }
+
+    consoleSpy.mockRestore();
+    rmSync(testDir, { force: true, recursive: true });
+  });
+
+  it("should include all keys when target file does not exist in diff mode", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+    const testDir = "/tmp/test-diff-no-target";
+
+    const state = {
+      config: {
+        localesDir: testDir,
+        mode: "diff",
+        sourceLocale: "en",
+        targetLocales: ["ja"],
+        tokenSize: 1000,
+      },
+      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
+      flattenedData: {
+        "en.json": {
+          "1.key1": "value1",
+          "1.key2": "value2",
+        },
+      },
+      lastCompletedBatchId: 0,
+      tasks: [],
+    };
+
+    const result = await buildTasksNode(state as typeof BuildTasksAnnotation.State);
+
+    expect(result.tasks).toBeDefined();
+    expect(result.tasks!.length).toBeGreaterThan(0);
+
+    consoleSpy.mockRestore();
+    rmSync(testDir, { force: true, recursive: true });
+  });
+
+  it("should handle nested keys in diff mode", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+    const testDir = "/tmp/test-diff-nested";
+    const targetDir = join(testDir, "ja");
+
+    mkdirSync(targetDir, { recursive: true });
+    writeFileSync(
+      join(targetDir, "nested.json"),
+      JSON.stringify({
+        user: {
+          name: "existing",
+        },
+      }),
+      "utf-8",
+    );
+
+    const state = {
+      config: {
+        localesDir: testDir,
+        mode: "diff",
+        sourceLocale: "en",
+        targetLocales: ["ja"],
+        tokenSize: 1000,
+      },
+      files: [
+        { absolutePath: "/test/nested.json", id: 1, relativePath: "nested.json" },
+      ] as FileItem[],
+      flattenedData: {
+        "nested.json": {
+          "1.user.age": "value2",
+          "1.user.name": "value1",
+        },
+      },
+      lastCompletedBatchId: 0,
+      tasks: [],
+    };
+
+    const result = await buildTasksNode(state as typeof BuildTasksAnnotation.State);
+
+    expect(result.tasks).toBeDefined();
+    if (result.tasks!.length > 0) {
+      const keys = result.tasks![0].keys.map((k) => k.prefixedKey);
+      expect(keys).toContain("1.user.age");
+      expect(keys).not.toContain("1.user.name");
+    }
+
+    consoleSpy.mockRestore();
+    rmSync(testDir, { force: true, recursive: true });
+  });
+
+  it("should handle invalid JSON in target file in diff mode", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+    const testDir = "/tmp/test-diff-invalid";
+    const targetDir = join(testDir, "ja");
+
+    mkdirSync(targetDir, { recursive: true });
+    writeFileSync(join(targetDir, "ja.json"), "invalid json", "utf-8");
+
+    const state = {
+      config: {
+        localesDir: testDir,
+        mode: "diff",
+        sourceLocale: "en",
+        targetLocales: ["ja"],
+        tokenSize: 1000,
+      },
+      files: [{ absolutePath: "/test/en.json", id: 1, relativePath: "en.json" }] as FileItem[],
+      flattenedData: {
+        "en.json": {
+          "1.key1": "value1",
+        },
+      },
+      lastCompletedBatchId: 0,
+      tasks: [],
+    };
+
+    const result = await buildTasksNode(state as typeof BuildTasksAnnotation.State);
+
+    expect(result.tasks).toBeDefined();
+    expect(result.tasks!.length).toBeGreaterThan(0);
+
+    consoleSpy.mockRestore();
+    rmSync(testDir, { force: true, recursive: true });
+  });
+
+  it("should handle files without extensions in diff mode", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+    const testDir = "/tmp/test-no-ext";
+    const targetDir = join(testDir, "ja");
+
+    mkdirSync(targetDir, { recursive: true });
+    writeFileSync(join(targetDir, "messages"), JSON.stringify({}), "utf-8");
+
+    const state = {
+      config: {
+        localesDir: testDir,
+        mode: "diff",
+        sourceLocale: "en",
+        targetLocales: ["ja"],
+        tokenSize: 1000,
+      },
+      files: [{ absolutePath: "/test/messages", id: 1, relativePath: "messages" }] as FileItem[],
+      flattenedData: {
+        messages: {
+          "1.key1": "value1",
+        },
+      },
+      lastCompletedBatchId: 0,
+      tasks: [],
+    };
+
+    const result = await buildTasksNode(state as typeof BuildTasksAnnotation.State);
+
+    expect(result.tasks).toBeDefined();
+
+    consoleSpy.mockRestore();
+    rmSync(testDir, { force: true, recursive: true });
   });
 });

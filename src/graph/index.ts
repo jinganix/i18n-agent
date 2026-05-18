@@ -21,6 +21,7 @@ export async function syncWorkflow(
   configPath: string,
   sourcePath?: string,
   dryRun?: boolean,
+  mode?: "full" | "diff",
 ): Promise<void> {
   const configResult = await new StateGraph(SyncAnnotation)
     .addNode("loadConfig", loadConfigNode)
@@ -29,8 +30,13 @@ export async function syncWorkflow(
     .compile()
     .invoke({ configPath });
 
+  const config = (configResult as typeof SyncAnnotation.State).config;
+  if (mode) {
+    config!.mode = mode;
+  }
+
   const scanState = {
-    config: (configResult as typeof SyncAnnotation.State).config,
+    config,
     files: [],
     sourcePath,
   };
@@ -55,7 +61,7 @@ export async function syncWorkflow(
     .invoke(flattenState);
 
   const buildState = {
-    config: (configResult as typeof SyncAnnotation.State).config!,
+    config: config!,
     files: (scanResult as typeof ScanFilesAnnotation.State).files,
     flattenedData: (flattenResult as typeof FlattenKeysAnnotation.State).flattenedData,
     lastCompletedBatchId: 0,
@@ -70,7 +76,7 @@ export async function syncWorkflow(
     .invoke(buildState);
 
   const translateState = {
-    apiConfig: (configResult as typeof SyncAnnotation.State).config?.api,
+    apiConfig: config?.api,
     dryRun: dryRun || false,
     tasks: (buildResult as typeof BuildTasksAnnotation.State).tasks,
     translatedResults: {},
@@ -97,7 +103,7 @@ export async function syncWorkflow(
     .invoke(validateState);
 
   const syncState = {
-    config: (configResult as typeof SyncAnnotation.State).config!,
+    config: config!,
     syncedFiles: [],
     tasks: (buildResult as typeof BuildTasksAnnotation.State).tasks,
     translatedResults: (translateResult as typeof TranslateAnnotation.State).translatedResults,
