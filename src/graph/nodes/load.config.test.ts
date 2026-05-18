@@ -20,7 +20,7 @@ describe("load.config", () => {
         timeout: 30000,
       },
       localesDir: "./locales",
-      sourceLocale: "en",
+      sourceLocale: "en-US",
       targetLocales: ["ja", "zh"],
       tokenSize: 3000,
     };
@@ -80,18 +80,15 @@ describe("load.config", () => {
   });
 
   it("should test annotation reducer behavior for config", () => {
-    // Test the reducer logic: y ?? x means use new value if provided, otherwise keep old
     const configReducer = (x: SyncConfig | null, y: SyncConfig | null): SyncConfig | null => y ?? x;
 
-    // When new value is provided, use it
     const newValue: SyncConfig = {
       localesDir: "./locales",
-      sourceLocale: "en",
+      sourceLocale: "en-US",
       targetLocales: ["zh"],
     };
     expect(configReducer(null, newValue)).toEqual(newValue);
 
-    // When new value is null, keep existing
     const existingValue: SyncConfig = {
       localesDir: "./existing",
       sourceLocale: "fr",
@@ -101,13 +98,10 @@ describe("load.config", () => {
   });
 
   it("should test annotation reducer behavior for configPath", () => {
-    // Test the reducer logic: y ?? x means use new value if not null/undefined, otherwise keep old
     const configPathReducer = (x: string, y: string): string => y ?? x;
 
-    // When new value is provided, use it
     expect(configPathReducer("", "new/path.json")).toBe("new/path.json");
 
-    // Empty string is not nullish, so it will be used (this is the actual behavior)
     expect(configPathReducer("existing/path.json", "")).toBe("");
   });
 });

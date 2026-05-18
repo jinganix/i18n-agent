@@ -1,9 +1,10 @@
 import { Annotation } from "@langchain/langgraph/web";
 import { existsSync, readFileSync } from "fs";
-import { join } from "path";
+import { resolve } from "path";
 import type { SyncMode } from "./load.config.js";
 import type { FileItem } from "@/utils/file.scanner.js";
 import { replaceReducer } from "@/utils/langgraph.helpers.js";
+import { normalizeLocale } from "@/utils/locale.helpers.js";
 import type { NormalizedResult } from "@/utils/normalize.keys.js";
 import { estimateObjectTokens } from "@/utils/token.estimator.js";
 
@@ -88,7 +89,7 @@ export async function buildTasksNode(
             state.config.sourceLocale,
             targetLocale,
           );
-          const targetPath = join(state.config.localesDir, targetLocale, targetFilePath);
+          const targetPath = resolve(state.config.localesDir, targetLocale, targetFilePath);
 
           if (shouldIncludeKey(targetPath, prefixedKey)) {
             localeKeys.push({
@@ -179,7 +180,7 @@ function getTargetFilePath(
   const fileExt = fileName.includes(".") ? `.${fileName.split(".").pop()}` : "";
   const fileNameWithoutExt = fileName.replace(fileExt, "");
 
-  if (fileNameWithoutExt === sourceLocale) {
+  if (normalizeLocale(fileNameWithoutExt) === normalizeLocale(sourceLocale)) {
     const dirPath = sourceFilePath.substring(0, sourceFilePath.lastIndexOf(fileName));
     return `${dirPath}${targetLocale}${fileExt}`;
   }

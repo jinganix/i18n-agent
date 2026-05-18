@@ -30,7 +30,7 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.user.name", value: "ユーザー名" }],
-        locale: "ja",
+        locale: "ja-JP",
         tokenCount: 25,
       },
     ];
@@ -39,8 +39,8 @@ describe("sync.files", () => {
       config: {
         localesDir: tempDir,
         mode: "full",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
       },
       syncedFiles: [],
       tasks,
@@ -55,7 +55,7 @@ describe("sync.files", () => {
 
     expect(result.syncedFiles).toBeDefined();
     expect(result.syncedFiles!.length).toBe(1);
-    expect(result.syncedFiles![0].locale).toBe("ja");
+    expect(result.syncedFiles![0].locale).toBe("ja-JP");
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Synced"));
 
     consoleSpy.mockRestore();
@@ -68,13 +68,13 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "値1" }],
-        locale: "ja",
+        locale: "ja-JP",
         tokenCount: 20,
       },
       {
         batchId: 2,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "値1" }],
-        locale: "zh",
+        locale: "zh-CN",
         tokenCount: 20,
       },
     ];
@@ -83,8 +83,8 @@ describe("sync.files", () => {
       config: {
         localesDir: tempDir,
         mode: "full",
-        sourceLocale: "en",
-        targetLocales: ["ja", "zh"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP", "zh-CN"],
       },
       syncedFiles: [],
       tasks,
@@ -111,8 +111,8 @@ describe("sync.files", () => {
     const tasks: TaskBatch[] = [
       {
         batchId: 1,
-        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "値1" }],
-        locale: "ja",
+        keys: [{ fileId: 1, filePath: "en-US.json", prefixedKey: "1.key1", value: "値1" }],
+        locale: "ja-JP",
         tokenCount: 20,
       },
     ];
@@ -121,8 +121,8 @@ describe("sync.files", () => {
       config: {
         localesDir: tempDir,
         mode: "full",
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
       },
       syncedFiles: [],
       tasks,
@@ -135,7 +135,7 @@ describe("sync.files", () => {
 
     const result = await syncFilesNode(state as typeof SyncFilesAnnotation.State);
 
-    expect(result.syncedFiles![0].filePath).toContain("ja.json");
+    expect(result.syncedFiles![0].filePath).toContain("ja-JP.json");
 
     consoleSpy.mockRestore();
   });
@@ -147,7 +147,7 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "nested.json", prefixedKey: "1.key1", value: "値1" }],
-        locale: "ja",
+        locale: "ja-JP",
         tokenCount: 20,
       },
     ];
@@ -155,8 +155,8 @@ describe("sync.files", () => {
     const state = {
       config: {
         localesDir: tempDir,
-        sourceLocale: "en",
-        targetLocales: ["ja"],
+        sourceLocale: "en-US",
+        targetLocales: ["ja-JP"],
       },
       syncedFiles: [],
       tasks,
@@ -181,7 +181,7 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "Value" }],
-        locale: "fr",
+        locale: "fr-FR",
         tokenCount: 20,
       },
     ];
@@ -190,19 +190,16 @@ describe("sync.files", () => {
       config: {
         localesDir: tempDir,
         mode: "full",
-        sourceLocale: "en",
-        targetLocales: ["fr"],
+        sourceLocale: "en-US",
+        targetLocales: ["fr-FR"],
       },
       syncedFiles: [],
       tasks,
-      translatedResults: {
-        // Missing batch_1 data
-      },
+      translatedResults: {},
     };
 
     const result = await syncFilesNode(state as typeof SyncFilesAnnotation.State);
 
-    // Should complete without error even with missing data
     expect(result.syncedFiles).toBeDefined();
 
     consoleSpy.mockRestore();
@@ -215,7 +212,7 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "messages", prefixedKey: "1.key1", value: "値1" }],
-        locale: "zh",
+        locale: "zh-CN",
         tokenCount: 20,
       },
     ];
@@ -223,8 +220,8 @@ describe("sync.files", () => {
     const state = {
       config: {
         localesDir: tempDir,
-        sourceLocale: "en",
-        targetLocales: ["zh"],
+        sourceLocale: "en-US",
+        targetLocales: ["zh-CN"],
       },
       syncedFiles: [],
       tasks,
@@ -252,7 +249,7 @@ describe("sync.files", () => {
           { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "値1" },
           { fileId: 2, filePath: "nested.json", prefixedKey: "2.key2", value: "値2" },
         ],
-        locale: "zh",
+        locale: "zh-CN",
         tokenCount: 40,
       },
     ];
@@ -261,8 +258,8 @@ describe("sync.files", () => {
       config: {
         localesDir: tempDir,
         mode: "full",
-        sourceLocale: "en",
-        targetLocales: ["zh"],
+        sourceLocale: "en-US",
+        targetLocales: ["zh-CN"],
       },
       syncedFiles: [],
       tasks,
@@ -284,18 +281,17 @@ describe("sync.files", () => {
   it("should handle multiple batches for same locale", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-    // Multiple batches for the same locale to test the if (!batchesByLocale[task.locale]) branch
     const tasks: TaskBatch[] = [
       {
         batchId: 1,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "Value1" }],
-        locale: "de",
+        locale: "de-DE",
         tokenCount: 20,
       },
       {
         batchId: 2,
         keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key2", value: "Value2" }],
-        locale: "de",
+        locale: "de-DE",
         tokenCount: 20,
       },
     ];
@@ -304,8 +300,8 @@ describe("sync.files", () => {
       config: {
         localesDir: tempDir,
         mode: "full",
-        sourceLocale: "en",
-        targetLocales: ["de"],
+        sourceLocale: "en-US",
+        targetLocales: ["de-DE"],
       },
       syncedFiles: [],
       tasks,
@@ -321,7 +317,6 @@ describe("sync.files", () => {
 
     const result = await syncFilesNode(state as typeof SyncFilesAnnotation.State);
 
-    // Both batches should be merged into one file
     expect(result.syncedFiles!.length).toBe(1);
     expect(result.syncedFiles![0].keyCount).toBe(2);
 

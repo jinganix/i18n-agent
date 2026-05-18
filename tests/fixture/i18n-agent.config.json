@@ -1,6 +1,6 @@
 {
-  "sourceLocale": "en",
-  "targetLocales": ["zh", "ru", "fr", "ar"],
+  "sourceLocale": "en-US",
+  "targetLocales": ["zh-CN", "ru-RU", "fr-FR", "ar-SA"],
   "localesDir": "./tests/fixture/locales",
   "model": "gpt-4o-mini",
   "tokenSize": 3000,

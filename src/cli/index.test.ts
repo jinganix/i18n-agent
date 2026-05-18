@@ -37,10 +37,8 @@ describe("runCLI", () => {
 
     runCLI(["node", "test", "sync", "-c", "./test-config.json"]);
 
-    // Wait for async action to complete
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    // process.exit should be called due to missing config
     expect(exitSpy).toHaveBeenCalled();
 
     exitSpy.mockRestore();
@@ -82,10 +80,8 @@ describe("executeIfMainModule", () => {
     const metaUrl = "file:///test/path/index.ts";
     const argvPath = "/test/path/index.ts";
 
-    // Verify isMain returns true when paths match
     expect(isMain(metaUrl, argvPath)).toBe(true);
 
-    // Verify isMain returns false when paths don't match
     expect(isMain(metaUrl, "/different/path.ts")).toBe(false);
   });
 
@@ -97,7 +93,6 @@ describe("executeIfMainModule", () => {
 
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
 
-    // Verify isMain returns false
     expect(isMain(metaUrl, argvPath)).toBe(false);
 
     executeIfMainModule();

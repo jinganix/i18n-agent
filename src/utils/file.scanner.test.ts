@@ -72,13 +72,10 @@ describe("file.scanner", () => {
     it("should recursively collect JSON files from subdirectories", async () => {
       const { readdirSync, statSync } = await import("fs");
 
-      // First call: root directory with one file and one subdirectory
-      // Second call: subdirectory with one file
       vi.mocked(readdirSync)
         .mockReturnValueOnce(["file1.json", "subdir"] as unknown as ReturnType<typeof readdirSync>)
         .mockReturnValueOnce(["file2.json"] as unknown as ReturnType<typeof readdirSync>);
 
-      // First two calls are for root dir entries, third call is for subdir entry
       vi.mocked(statSync)
         .mockReturnValueOnce({
           isDirectory: () => false,

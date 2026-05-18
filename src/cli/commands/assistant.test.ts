@@ -14,7 +14,15 @@ vi.mock("fs", async (importOriginal) => {
   const actual = (await importOriginal()) as object;
   return {
     ...actual,
-    readFileSync: vi.fn(),
+    readFileSync: vi.fn((path: string) => {
+      if (path.includes("assistant.md")) {
+        return `You are an i18n assistant.\n\nAvailable tools you can use:\n{{tools}}\n\nAlways respond with valid JSON only.`;
+      }
+      if (path.includes("nonexistent")) {
+        throw new Error("File not found");
+      }
+      throw new Error("File not found");
+    }),
   };
 });
 
@@ -101,7 +109,6 @@ describe("commands/assistant", () => {
 
     assistantCommand(program);
 
-    // Call the action with undefined message
     await capturedAction!(undefined, {});
 
     expect(errorSpy).toHaveBeenCalledWith("Error: Please provide a message");
@@ -298,7 +305,6 @@ describe("commands/assistant", () => {
     await executeAssistant("test message");
 
     expect(logSpy).toHaveBeenCalledWith("\n✅ Success: Diff completed");
-    // Should not log result data since there is none
     expect(logSpy).not.toHaveBeenCalledWith("📊 Result:", expect.any(String));
   });
 
@@ -332,10 +338,114 @@ describe("commands/assistant", () => {
 
     assistantCommand(program);
 
-    // Call with undefined positional message but message in options
     await capturedAction!(undefined, { message: "test from options" });
 
-    // Should not exit since we have a message
     expect(exitSpy).not.toHaveBeenCalled();
+  });
+
+  it("should validate and normalize target locales from AI response", async () => {
+    const { readFileSync } = await import("fs");
+    const { callTranslationApi } = await import("../../utils/api.client.js");
+    const { executeToolCall } = await import("../utils/tool.executor.js");
+
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({
+        api: {
+          apiKey: "test-key",
+          baseUrl: "https://api.test.com",
+        },
+      }),
+    );
+
+    vi.mocked(callTranslationApi).mockResolvedValue(
+      JSON.stringify({
+        explanation: "Translating to Chinese and Russian",
+        parameters: { source: "test.json", targetLocales: ["zh-cn", "ru-ru"] },
+        tool: "sync",
+      }),
+    );
+
+    vi.mocked(executeToolCall).mockResolvedValue({
+      message: "Sync completed",
+      success: true,
+    });
+
+    await executeAssistant("Translate test.json to Chinese and Russian");
+
+    expect(executeToolCall).toHaveBeenCalledWith(
+      "sync",
+      expect.objectContaining({
+        targetLocales: ["zh-CN", "ru-RU"],
+      }),
+      expect.any(String),
+    );
+  });
+
+  it("should not override targetLocales if already provided by AI", async () => {
+    const { readFileSync } = await import("fs");
+    const { callTranslationApi } = await import("../../utils/api.client.js");
+    const { executeToolCall } = await import("../utils/tool.executor.js");
+
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({
+        api: {
+          apiKey: "test-key",
+          baseUrl: "https://api.test.com",
+        },
+      }),
+    );
+
+    vi.mocked(callTranslationApi).mockResolvedValue(
+      JSON.stringify({
+        explanation: "Translating to Japanese",
+        parameters: { source: "test.json", targetLocales: ["ja-jp"] },
+        tool: "sync",
+      }),
+    );
+
+    vi.mocked(executeToolCall).mockResolvedValue({
+      message: "Sync completed",
+      success: true,
+    });
+
+    await executeAssistant("Translate test.json to Chinese");
+
+    expect(executeToolCall).toHaveBeenCalledWith(
+      "sync",
+      expect.objectContaining({
+        targetLocales: ["ja-JP"],
+      }),
+      expect.any(String),
+    );
+  });
+
+  it("should reject invalid locale format from AI", async () => {
+    const { readFileSync } = await import("fs");
+    const { callTranslationApi } = await import("../../utils/api.client.js");
+
+    vi.mocked(readFileSync).mockReturnValue(
+      JSON.stringify({
+        api: {
+          apiKey: "test-key",
+          baseUrl: "https://api.test.com",
+        },
+      }),
+    );
+
+    vi.mocked(callTranslationApi).mockResolvedValue(
+      JSON.stringify({
+        explanation: "Translating to Chinese",
+        parameters: { source: "test.json", targetLocales: ["chinese"] },
+        tool: "sync",
+      }),
+    );
+
+    await executeAssistant("Translate test.json to Chinese");
+
+    expect(errorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('Invalid locale format: "chinese"'),
+    );
+    expect(logSpy).toHaveBeenCalledWith(expect.stringContaining("Please use BCP 47 format"));
+    expect(exitSpy).toHaveBeenCalledWith(1);
   });
 });

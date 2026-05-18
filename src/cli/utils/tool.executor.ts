@@ -16,7 +16,6 @@ export async function executeToolCall(
     switch (toolName) {
       case "sync": {
         const syncParams = parameters as Partial<SyncOptions> & { sourcePath?: string };
-        // Use provided config or fall back to default
         const config = (syncParams.config || defaultConfigPath) as string | undefined;
         if (!config) {
           return {
@@ -29,7 +28,9 @@ export async function executeToolCall(
         await executeSync({
           config,
           dryRun: syncParams.dryRun as boolean | undefined,
+          mode: syncParams.mode as "full" | "diff" | undefined,
           source: (syncParams.sourcePath || syncParams.source) as string | undefined,
+          targetLocales: syncParams.targetLocales as string[] | undefined,
         });
 
         return {

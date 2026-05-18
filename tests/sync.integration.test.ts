@@ -17,7 +17,6 @@ vi.mock("@/graph/nodes/translate.js", async (importOriginal) => {
   const { readFileSync, existsSync } = await import("fs");
   const { join } = await import("path");
 
-  // Helper function to get nested value from object using dot notation
   const getNestedValue = (
     obj: Record<string, unknown>,
     path: string,
@@ -43,15 +42,12 @@ vi.mock("@/graph/nodes/translate.js", async (importOriginal) => {
         const batchKey = `batch_${task.batchId}`;
         const locale = task.locale;
 
-        // For each key, try to find its translation in fixture files
         const translatedData: Record<string, string> = {};
         for (const key of task.keys) {
           const originalKey = key.prefixedKey.split(".").slice(1).join(".");
 
-          // Try to find the translation in all fixture files for this locale
           let found = false;
 
-          // Check both locale.json and nested.json
           const possibleFiles = [`${locale}.json`, "nested.json"];
           for (const fileName of possibleFiles) {
             const filePath = join(fixtureDir, "locales", locale, fileName);
@@ -61,18 +57,16 @@ vi.mock("@/graph/nodes/translate.js", async (importOriginal) => {
                 const fileContent = JSON.parse(content);
                 const value = getNestedValue(fileContent, originalKey);
                 if (value !== undefined) {
-                  // Convert to string like the real translateNode does
                   translatedData[key.prefixedKey] = value === null ? "null" : String(value);
                   found = true;
                   break;
                 }
               } catch {
-                // Continue to next file
+                // ignore
               }
             }
           }
 
-          // Fallback: convert to string
           if (!found) {
             translatedData[key.prefixedKey] = String(key.value);
           }
@@ -109,13 +103,13 @@ describe("sync workflow integration test", () => {
 
     const { writeFileSync, mkdirSync: mkDir } = await import("fs");
     const testLocalesDir = join(outputDir, "test-locales");
-    const testEnDir = join(testLocalesDir, "en");
+    const testEnDir = join(testLocalesDir, "en-US");
 
     mkDir(testEnDir, { recursive: true });
 
-    const enFiles = ["en.json", "nested.json"];
+    const enFiles = ["en-US.json", "nested.json"];
     for (const file of enFiles) {
-      const sourcePath = join(fixtureDir, "locales", "en", file);
+      const sourcePath = join(fixtureDir, "locales", "en-US", file);
       const targetPath = join(testEnDir, file);
       const content = readFileSync(sourcePath, "utf-8");
       writeFileSync(targetPath, content);
@@ -125,8 +119,7 @@ describe("sync workflow integration test", () => {
 
     await syncWorkflow(modifiedConfigPath);
 
-    // Check all target locales
-    const targetLocales = ["zh", "ru", "fr", "ar"];
+    const targetLocales = ["zh-CN", "ru-RU", "fr-FR", "ar-SA"];
 
     for (const locale of targetLocales) {
       const expectedDir = join(fixtureDir, "locales", locale);
@@ -142,18 +135,15 @@ describe("sync workflow integration test", () => {
         const expectedContent = JSON.parse(readFileSync(expectedPath, "utf-8"));
         const actualContent = JSON.parse(readFileSync(actualPath, "utf-8"));
 
-        // Compare keys exist and have translated values (as strings)
         for (const key of Object.keys(expectedContent)) {
           expect(actualContent[key]).toBeDefined();
           const expectedValue = expectedContent[key];
           const actualValue = actualContent[key];
 
-          // Helper function to compare values recursively
           const compareValues = (expected: unknown, actual: unknown): void => {
             if (expected === null) {
               expect(actual).toBe("null");
             } else if (typeof expected === "object" && !Array.isArray(expected)) {
-              // For nested objects, compare each property
               const expectedObj = expected as Record<string, unknown>;
               const actualObj = actual as Record<string, unknown>;
               for (const nestedKey of Object.keys(expectedObj)) {
@@ -161,7 +151,6 @@ describe("sync workflow integration test", () => {
                 compareValues(expectedObj[nestedKey], actualObj[nestedKey]);
               }
             } else {
-              // For primitives, convert both to string and compare
               expect(String(actual)).toBe(String(expected));
             }
           };
@@ -182,11 +171,11 @@ describe("sync workflow integration test", () => {
 
     const { writeFileSync, mkdirSync: mkDir } = await import("fs");
     const testLocalesDir = join(outputDir, "test-locales2");
-    const testEnDir = join(testLocalesDir, "en");
+    const testEnDir = join(testLocalesDir, "en-US");
 
     mkDir(testEnDir, { recursive: true });
 
-    const sourcePath = join(fixtureDir, "locales", "en", "nested.json");
+    const sourcePath = join(fixtureDir, "locales", "en-US", "nested.json");
     const targetPath = join(testEnDir, "nested.json");
     const content = readFileSync(sourcePath, "utf-8");
     writeFileSync(targetPath, content);
@@ -195,7 +184,7 @@ describe("sync workflow integration test", () => {
 
     await syncWorkflow(modifiedConfigPath);
 
-    const actualRuPath = join(testLocalesDir, "ru", "nested.json");
+    const actualRuPath = join(testLocalesDir, "ru-RU", "nested.json");
     const actualRuContent = JSON.parse(readFileSync(actualRuPath, "utf-8"));
 
     expect(actualRuContent.user.profile.age).toBe("30");
@@ -213,12 +202,12 @@ describe("sync workflow integration test", () => {
 
     const { writeFileSync, mkdirSync: mkDir } = await import("fs");
     const testLocalesDir = join(outputDir, "test-locales3");
-    const testEnDir = join(testLocalesDir, "en");
+    const testEnDir = join(testLocalesDir, "en-US");
 
     mkDir(testEnDir, { recursive: true });
 
-    const sourcePath = join(fixtureDir, "locales", "en", "en.json");
-    const targetPath = join(testEnDir, "en.json");
+    const sourcePath = join(fixtureDir, "locales", "en-US", "en-US.json");
+    const targetPath = join(testEnDir, "en-US.json");
     const content = readFileSync(sourcePath, "utf-8");
     writeFileSync(targetPath, content);
 
@@ -226,8 +215,8 @@ describe("sync workflow integration test", () => {
 
     await syncWorkflow(modifiedConfigPath);
 
-    const actualRuPath = join(testLocalesDir, "ru", "ru.json");
-    const actualZhPath = join(testLocalesDir, "zh", "zh.json");
+    const actualRuPath = join(testLocalesDir, "ru-RU", "ru-RU.json");
+    const actualZhPath = join(testLocalesDir, "zh-CN", "zh-CN.json");
 
     const actualRuContent = JSON.parse(readFileSync(actualRuPath, "utf-8"));
     const actualZhContent = JSON.parse(readFileSync(actualZhPath, "utf-8"));

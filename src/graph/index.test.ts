@@ -44,7 +44,7 @@ describe("graph/index", () => {
 
     await syncWorkflow(
       "tests/fixture/i18n-agent.config.json",
-      "tests/fixture/locales/en/en.json",
+      "tests/fixture/locales/en-US/en-US.json",
       undefined,
       "full",
     );
@@ -59,7 +59,6 @@ describe("graph/index", () => {
 
     await syncWorkflow("tests/fixture/i18n-agent.config.json", undefined, undefined, "full");
 
-    // Should log file flattening
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Flattened file"));
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Total files flattened"));
 
@@ -95,6 +94,19 @@ describe("graph/index", () => {
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Synced"));
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Total files synced"));
+
+    consoleSpy.mockRestore();
+  });
+
+  it("should override targetLocales when provided", async () => {
+    const consoleSpy = vi.spyOn(console, "log");
+
+    await syncWorkflow("tests/fixture/i18n-agent.config.json", undefined, undefined, "full", [
+      "zh-CN",
+      "ru-RU",
+    ]);
+
+    expect(consoleSpy).toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });

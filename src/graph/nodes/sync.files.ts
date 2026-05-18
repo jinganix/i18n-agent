@@ -3,6 +3,7 @@ import { join } from "path";
 import type { TaskBatch } from "./build.tasks.js";
 import { syncTranslationToFile, mergeWithExistingData } from "@/utils/file.syncer.js";
 import { replaceReducer } from "@/utils/langgraph.helpers.js";
+import { normalizeLocale } from "@/utils/locale.helpers.js";
 
 export interface SyncFilesState {
   config: {
@@ -100,7 +101,7 @@ export async function syncFilesNode(
       const fileExt = fileName.includes(".") ? `.${fileName.split(".").pop()}` : "";
       const fileNameWithoutExt = fileName.replace(fileExt, "");
 
-      if (fileNameWithoutExt === state.config.sourceLocale) {
+      if (normalizeLocale(fileNameWithoutExt) === normalizeLocale(state.config.sourceLocale)) {
         const dirPath = targetFilePath.substring(0, targetFilePath.lastIndexOf(fileName));
         targetFilePath = `${dirPath}${locale}${fileExt}`;
       }

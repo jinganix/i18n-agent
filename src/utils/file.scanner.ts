@@ -7,14 +7,6 @@ export interface FileItem {
   absolutePath: string;
 }
 
-/**
- * Recursively collect all JSON files from a directory
- * @param dir - Directory to scan
- * @param baseDir - Base directory for calculating relative paths
- * @param files - Array to collect file items
- * @param startId - Starting ID for file numbering
- * @returns Next available ID
- */
 export function collectJsonFiles(
   dir: string,
   baseDir: string,
@@ -43,10 +35,6 @@ export function collectJsonFiles(
   return currentId;
 }
 
-/**
- * Log file list to console
- * @param files - Array of file items to log
- */
 export function logFileList(files: FileItem[]): void {
   console.log(`Found ${files.length} file(s) to process:`);
   files.forEach((file) => {

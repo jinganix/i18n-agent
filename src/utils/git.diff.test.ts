@@ -314,10 +314,6 @@ describe("utils/git.diff", () => {
       const { existsSync, readFileSync } = await import("fs");
       vi.mocked(existsSync).mockReturnValue(true);
 
-      // Mock readFileSync calls in order:
-      // 1. detectGitChanges reads current content
-      // 2. detectMissingKeysInTarget reads source content
-      // 3. detectMissingKeysInTarget reads target content
       vi.mocked(readFileSync)
         .mockReturnValueOnce('{"key1": "v1", "key2": "v2"}') // source current (in detectGitChanges)
         .mockReturnValueOnce('{"key1": "v1", "key2": "v2"}') // source (in detectMissingKeysInTarget)
