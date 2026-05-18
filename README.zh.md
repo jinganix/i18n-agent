@@ -22,7 +22,35 @@
 
 ## 🚀 快速开始
 
-### 安装
+### 方式一：本地安装（推荐）
+
+由于项目尚未发布到 npm，建议通过克隆仓库的方式使用：
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/jinganix/i18n-agent.git
+cd i18n-agent
+
+# 2. 安装依赖
+npm install
+
+# 3. 构建项目
+npm run build
+
+# 4. 创建配置文件
+# 在项目根目录创建 i18n-agent.config.json（见下方配置说明）
+
+# 5. 运行命令
+# 使用构建后的 CLI
+./dist/cli/index.js ask "将 en-US.json 翻译成简体中文" -c ./i18n-agent.config.json
+
+# 或者在开发模式下运行（无需构建）
+npm run cli -- ask "将 en-US.json 翻译成简体中文" -c ./i18n-agent.config.json
+```
+
+### 方式二：全局安装（待发布）
+
+项目发布到 npm 后，可以使用以下方式安装：
 
 ```bash
 npm install -g i18n-agent

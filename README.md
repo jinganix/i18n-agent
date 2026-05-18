@@ -23,7 +23,35 @@ translation files using natural language commands.
 
 ## 🚀 Quick Start
 
-### Installation
+### Option 1: Local Installation (Recommended)
+
+Since the project is not yet published to npm, it's recommended to use it by cloning the repository:
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/jinganix/i18n-agent.git
+cd i18n-agent
+
+# 2. Install dependencies
+npm install
+
+# 3. Build the project
+npm run build
+
+# 4. Create configuration file
+# Create i18n-agent.config.json in the project root (see configuration section below)
+
+# 5. Run commands
+# Use the built CLI
+./dist/cli/index.js ask "Translate en-US.json to Simplified Chinese" -c ./i18n-agent.config.json
+
+# Or run in development mode (no build required)
+npm run cli -- ask "Translate en-US.json to Simplified Chinese" -c ./i18n-agent.config.json
+```
+
+### Option 2: Global Installation (Coming Soon)
+
+Once the project is published to npm, you can install it globally:
 
 ```bash
 npm install -g i18n-agent
