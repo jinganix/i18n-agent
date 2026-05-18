@@ -112,6 +112,7 @@ describe("commands/sync", () => {
       "tests/fixture/i18n-agent.config.json",
       "messages.json",
       undefined,
+      undefined,
     );
   });
 
@@ -127,6 +128,7 @@ describe("commands/sync", () => {
       "tests/fixture/i18n-agent.config.json",
       undefined,
       true,
+      undefined,
     );
   });
 
@@ -143,6 +145,7 @@ describe("commands/sync", () => {
       "tests/fixture/i18n-agent.config.json",
       "nested.json",
       true,
+      undefined,
     );
   });
 });

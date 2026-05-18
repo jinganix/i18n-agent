@@ -32,7 +32,7 @@ describe("graph/index", () => {
   it("should sync workflow and load config", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-    await syncWorkflow("tests/fixture/i18n-agent.config.json");
+    await syncWorkflow("tests/fixture/i18n-agent.config.json", undefined, undefined, "full");
 
     expect(consoleSpy).toHaveBeenCalled();
 
@@ -42,7 +42,12 @@ describe("graph/index", () => {
   it("should sync workflow with source path", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-    await syncWorkflow("tests/fixture/i18n-agent.config.json", "tests/fixture/locales/en/en.json");
+    await syncWorkflow(
+      "tests/fixture/i18n-agent.config.json",
+      "tests/fixture/locales/en/en.json",
+      undefined,
+      "full",
+    );
 
     expect(consoleSpy).toHaveBeenCalled();
 
@@ -52,7 +57,7 @@ describe("graph/index", () => {
   it("should flatten keys in sync workflow", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-    await syncWorkflow("tests/fixture/i18n-agent.config.json");
+    await syncWorkflow("tests/fixture/i18n-agent.config.json", undefined, undefined, "full");
 
     // Should log file flattening
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Flattened file"));
@@ -64,7 +69,7 @@ describe("graph/index", () => {
   it("should build tasks in sync workflow", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-    await syncWorkflow("tests/fixture/i18n-agent.config.json");
+    await syncWorkflow("tests/fixture/i18n-agent.config.json", undefined, undefined, "full");
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Built"));
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Batch"));
@@ -75,7 +80,7 @@ describe("graph/index", () => {
   it("should translate in sync workflow", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-    await syncWorkflow("tests/fixture/i18n-agent.config.json");
+    await syncWorkflow("tests/fixture/i18n-agent.config.json", undefined, undefined, "full");
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Translating batch"));
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Translation completed"));
@@ -86,7 +91,7 @@ describe("graph/index", () => {
   it("should sync files in sync workflow", async () => {
     const consoleSpy = vi.spyOn(console, "log");
 
-    await syncWorkflow("tests/fixture/i18n-agent.config.json");
+    await syncWorkflow("tests/fixture/i18n-agent.config.json", undefined, undefined, "full");
 
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Synced"));
     expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining("Total files synced"));

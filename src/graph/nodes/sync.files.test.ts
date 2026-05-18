@@ -5,8 +5,9 @@ import type { TaskBatch } from "./build.tasks.js";
 import { syncFilesNode, SyncFilesAnnotation } from "./sync.files.js";
 
 vi.mock("../../utils/file.syncer.js", () => ({
-  syncTranslationToFile: vi.fn((path, data) => ({
-    filePath: path,
+  mergeWithExistingData: vi.fn((_path, data) => data),
+  syncTranslationToFile: vi.fn((_path, data) => ({
+    filePath: _path,
     keyCount: Object.keys(data).length,
   })),
 }));
@@ -37,6 +38,7 @@ describe("sync.files", () => {
     const state = {
       config: {
         localesDir: tempDir,
+        mode: "full",
         sourceLocale: "en",
         targetLocales: ["ja"],
       },
@@ -71,7 +73,7 @@ describe("sync.files", () => {
       },
       {
         batchId: 2,
-        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "值1" }],
+        keys: [{ fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "値1" }],
         locale: "zh",
         tokenCount: 20,
       },
@@ -80,6 +82,7 @@ describe("sync.files", () => {
     const state = {
       config: {
         localesDir: tempDir,
+        mode: "full",
         sourceLocale: "en",
         targetLocales: ["ja", "zh"],
       },
@@ -90,7 +93,7 @@ describe("sync.files", () => {
           "1.key1": "値1",
         },
         batch_2: {
-          "1.key1": "值1",
+          "1.key1": "値1",
         },
       },
     };
@@ -117,6 +120,7 @@ describe("sync.files", () => {
     const state = {
       config: {
         localesDir: tempDir,
+        mode: "full",
         sourceLocale: "en",
         targetLocales: ["ja"],
       },
@@ -185,6 +189,7 @@ describe("sync.files", () => {
     const state = {
       config: {
         localesDir: tempDir,
+        mode: "full",
         sourceLocale: "en",
         targetLocales: ["fr"],
       },
@@ -209,7 +214,7 @@ describe("sync.files", () => {
     const tasks: TaskBatch[] = [
       {
         batchId: 1,
-        keys: [{ fileId: 1, filePath: "messages", prefixedKey: "1.key1", value: "值1" }],
+        keys: [{ fileId: 1, filePath: "messages", prefixedKey: "1.key1", value: "値1" }],
         locale: "zh",
         tokenCount: 20,
       },
@@ -225,7 +230,7 @@ describe("sync.files", () => {
       tasks,
       translatedResults: {
         batch_1: {
-          "1.key1": "值1",
+          "1.key1": "値1",
         },
       },
     };
@@ -244,8 +249,8 @@ describe("sync.files", () => {
       {
         batchId: 1,
         keys: [
-          { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "值1" },
-          { fileId: 2, filePath: "nested.json", prefixedKey: "2.key2", value: "值2" },
+          { fileId: 1, filePath: "en.json", prefixedKey: "1.key1", value: "値1" },
+          { fileId: 2, filePath: "nested.json", prefixedKey: "2.key2", value: "値2" },
         ],
         locale: "zh",
         tokenCount: 40,
@@ -255,6 +260,7 @@ describe("sync.files", () => {
     const state = {
       config: {
         localesDir: tempDir,
+        mode: "full",
         sourceLocale: "en",
         targetLocales: ["zh"],
       },
@@ -262,8 +268,8 @@ describe("sync.files", () => {
       tasks,
       translatedResults: {
         batch_1: {
-          "1.key1": "值1",
-          "2.key2": "值2",
+          "1.key1": "値1",
+          "2.key2": "値2",
         },
       },
     };
@@ -297,6 +303,7 @@ describe("sync.files", () => {
     const state = {
       config: {
         localesDir: tempDir,
+        mode: "full",
         sourceLocale: "en",
         targetLocales: ["de"],
       },

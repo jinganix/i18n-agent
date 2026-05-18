@@ -1,7 +1,7 @@
 import { Annotation } from "@langchain/langgraph/web";
 import { join } from "path";
 import type { TaskBatch } from "./build.tasks.js";
-import { syncTranslationToFile } from "@/utils/file.syncer.js";
+import { syncTranslationToFile, mergeWithExistingData } from "@/utils/file.syncer.js";
 import { replaceReducer } from "@/utils/langgraph.helpers.js";
 
 export interface SyncFilesState {
@@ -9,6 +9,7 @@ export interface SyncFilesState {
     sourceLocale: string;
     targetLocales: string[];
     localesDir: string;
+    mode?: "full" | "diff";
   };
   tasks: TaskBatch[];
   translatedResults: Record<string, Record<string, string>>;
@@ -50,6 +51,8 @@ export async function syncFilesNode(
     filePath: string;
     keyCount: number;
   }> = [];
+
+  const mode = state.config.mode || "diff";
 
   const batchesByLocale: Record<string, TaskBatch[]> = {};
   for (const task of state.tasks) {
@@ -104,7 +107,13 @@ export async function syncFilesNode(
 
       const targetPath = join(state.config.localesDir, locale, targetFilePath);
 
-      const result = syncTranslationToFile(targetPath, fileInfo.data);
+      let finalData: Record<string, string> = fileInfo.data;
+      if (mode === "diff") {
+        const merged = mergeWithExistingData(targetPath, fileInfo.data);
+        finalData = Object.fromEntries(Object.entries(merged).map(([k, v]) => [k, String(v)]));
+      }
+
+      const result = syncTranslationToFile(targetPath, finalData);
       syncedFiles.push({
         filePath: result.filePath,
         keyCount: result.keyCount,

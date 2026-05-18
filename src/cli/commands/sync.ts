@@ -5,6 +5,7 @@ export interface SyncOptions {
   config?: string;
   source?: string;
   dryRun?: boolean;
+  mode?: "full" | "diff";
 }
 
 export async function executeSync(options: SyncOptions): Promise<void> {
@@ -15,7 +16,7 @@ export async function executeSync(options: SyncOptions): Promise<void> {
   }
 
   try {
-    await syncWorkflow(options.config, options.source, options.dryRun);
+    await syncWorkflow(options.config, options.source, options.dryRun, options.mode);
   } catch (error) {
     console.error(`Error: ${(error as Error).message}`);
     process.exit(1);
@@ -29,6 +30,7 @@ export function syncCommand(program: Command): void {
     .option("-c, --config <path>", "Configuration file path")
     .option("-s, --source <path>", "Source file or directory path (relative to source locale)")
     .option("--dry-run", "Preview changes without calling AI translation API")
+    .option("-m, --mode <mode>", "Sync mode: full or diff (default: diff)")
     .action(async (options: SyncOptions) => {
       await executeSync(options);
     });
